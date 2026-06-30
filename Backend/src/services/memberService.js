@@ -215,16 +215,86 @@ class MemberService {
   }
 
   async activate(id, organizationId, activatedBy) {
-    const member = await memberRepository.findOne({ where: { id, organizationId } });
-    if (!member) throw new NotFoundError('Member not found.');
-    if (member.status === MEMBER_STATUSES.ACTIVE) throw new AppError('Member is already active.', 400);
+    const t = await sequelize.transaction();
+    try {
+      const member = await memberRepository.findOne({ where: { id, organizationId } });
+      if (!member) throw new NotFoundError('Member not found.');
+      if (member.status === MEMBER_STATUSES.ACTIVE) throw new AppError('Member is already active.', 400);
 
-    await member.update({
-      status: MEMBER_STATUSES.ACTIVE,
-      activatedAt: new Date(),
-      activatedBy,
-    });
-    return member;
+      // 1. Activate member
+      await member.update({
+        status: MEMBER_STATUSES.ACTIVE,
+        activatedAt: new Date(),
+        activatedBy,
+      }, { transaction: t });
+
+      // 2. Find and activate the user account
+      const userAccount = await User.findOne({ 
+        where: { memberId: id, organizationId } 
+      });
+
+      if (userAccount) {
+        await userAccount.update({ status: 'active' }, { transaction: t });
+        
+        // 3. Create savings accounts if they don't exist
+        const existingAccounts = await SavingsAccount.count({ 
+          where: { memberId: id, organizationId } 
+        });
+
+        if (existingAccounts === 0) {
+          // Auto-create ordinary savings account
+          await SavingsAccount.create({
+            organizationId,
+            branchId: member.branchId,
+            memberId: member.id,
+            accountNumber: generateAccountNumber('SAV'),
+            accountType: SAVINGS_ACCOUNT_TYPES.ORDINARY,
+            interestRate: 6.0,
+            minimumBalance: 0,
+            status: 'active',
+          }, { transaction: t });
+
+          // Auto-create share capital account
+          await SavingsAccount.create({
+            organizationId,
+            branchId: member.branchId,
+            memberId: member.id,
+            accountNumber: generateAccountNumber('SHR'),
+            accountType: SAVINGS_ACCOUNT_TYPES.SHARE_CAPITAL,
+            interestRate: 0,
+            minimumBalance: 500,
+            status: 'active',
+          }, { transaction: t });
+        }
+
+        await t.commit();
+
+        // 4. Send activation email with login credentials
+        if (member.email) {
+          try {
+            const emailData = {
+              ...member.toJSON(),
+              firstName: member.firstName,
+              lastName: member.lastName,
+              email: member.email,
+              memberNumber: member.memberNumber,
+            };
+            await emailService.sendWelcomeEmail(emailData);
+            logger.info(`Activation email sent to member: ${member.email}`);
+          } catch (emailError) {
+            logger.error(`Failed to send activation email to ${member.email}:`, emailError.message);
+          }
+        }
+      } else {
+        await t.commit();
+        logger.warn(`No user account found for member ${id}`);
+      }
+
+      return member;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
   }
 
   async suspend(id, organizationId, suspendedBy, reason) {
