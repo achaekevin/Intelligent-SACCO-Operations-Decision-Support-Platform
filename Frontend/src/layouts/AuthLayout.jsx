@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -6,7 +6,20 @@ import { Landmark, ShieldCheck, TrendingUp, Users } from 'lucide-react'
 
 const AuthLayout = () => {
   const { theme } = useSelector((s) => s.ui)
+  const location = useLocation()
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/'
 
+  // Full-screen layout for login page
+  if (isLoginPage) {
+    return (
+      <div className={theme === 'dark' ? 'dark' : ''}>
+        <Outlet />
+        <ToastContainer position="top-right" autoClose={3500} theme={theme} />
+      </div>
+    )
+  }
+
+  // Traditional split layout for other auth pages
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
       <div className="min-h-screen grid lg:grid-cols-2 bg-cream dark:bg-ink-900">
