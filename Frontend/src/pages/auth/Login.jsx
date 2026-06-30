@@ -25,7 +25,6 @@ const Login = () => {
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: { email: 'admin@amanasacco.co.ke', password: 'password' },
   })
 
   const onSubmit = async (data) => {
@@ -43,11 +42,6 @@ const Login = () => {
     <div className="w-full">
       <h1 className="font-display text-2xl font-bold text-ink-800 dark:text-ink-50 animate-fade-in-up">Welcome back</h1>
       <p className="text-sm text-ink-400 mt-1.5 mb-6 animate-fade-in-up delay-75">Sign in to access your SACCO dashboard.</p>
-
-      <div className="bg-info-light text-info text-xs rounded-lg px-3 py-2.5 mb-5 leading-relaxed animate-fade-in-up delay-100">
-        Demo accounts (password: <span className="font-mono">password</span>):<br />
-        admin@amanasacco.co.ke · loans@amanasacco.co.ke · teller@amanasacco.co.ke · member@amanasacco.co.ke
-      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="animate-fade-in-up delay-150">
         <FormField label="Email address" error={errors.email} required>
