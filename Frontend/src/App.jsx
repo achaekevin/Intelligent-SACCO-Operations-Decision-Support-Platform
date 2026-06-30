@@ -170,7 +170,7 @@ function App() {
       </Route>
 
       <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
