@@ -2,6 +2,16 @@ import organizationService from '../services/organizationService.js';
 import { successResponse, createdResponse, paginatedResponse } from '../utils/response.js';
 
 class OrganizationController {
+  async register(req, res, next) {
+    try {
+      const result = await organizationService.register(req.body);
+      return createdResponse(res, { 
+        message: 'SACCO registered successfully. Please check your email to verify your account.', 
+        data: result 
+      });
+    } catch (err) { next(err); }
+  }
+
   async list(req, res, next) {
     try {
       const { page = 1, limit = 20, status } = req.query;

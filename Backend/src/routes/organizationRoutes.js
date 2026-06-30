@@ -15,6 +15,32 @@ const router = Router();
 
 /**
  * @swagger
+ * /organizations/register:
+ *   post:
+ *     summary: Register a new SACCO (Public endpoint)
+ *     tags: [Organizations]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email, phone, address, adminFirstName, adminLastName, adminEmail, adminPhone, adminPassword]
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string }
+ *               phone: { type: string }
+ *               address: { type: string }
+ *               adminFirstName: { type: string }
+ *               adminLastName: { type: string }
+ *               adminEmail: { type: string }
+ *               adminPhone: { type: string }
+ *               adminPassword: { type: string }
+ */
+router.post('/register', organizationController.register);
+
+/**
+ * @swagger
  * /organizations:
  *   get:
  *     summary: List all organizations (Super Admin only)
