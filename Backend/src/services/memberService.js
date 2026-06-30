@@ -1,0 +1,187 @@
+import { sequelize, Member, User, NextOfKin, MemberDocument, SavingsAccount, Loan } from '../models/index.js';
+import { memberRepository, savingsAccountRepository } from '../repositories/index.js';
+import { NotFoundError, ConflictError, AppError } from '../utils/errors.js';
+import { generateMemberNumber, generateAccountNumber, getPagination, getOrderClause } from '../utils/helpers.js';
+import { SAVINGS_ACCOUNT_TYPES, MEMBER_STATUSES } from '../constants/index.js';
+import emailService from './emailService.js';
+import logger from '../utils/logger.js';
+
+class MemberService {
+  async register(organizationId, branchId, data, createdBy) {
+    const t = await sequelize.transaction();
+    try {
+      // Uniqueness checks
+      const phoneExists = await memberRepository.findByPhone(data.phone, organizationId);
+      if (phoneExists) throw new ConflictError('A member with this phone number already exists.');
+
+      const idExists = await memberRepository.findByNationalId(data.nationalId, organizationId);
+      if (idExists) throw new ConflictError('A member with this national ID already exists.');
+
+      // Generate member number
+      const sequence = await memberRepository.getNextSequence(organizationId);
+      const memberNumber = generateMemberNumber(sequence);
+
+      // 1. Create member
+      const member = await Member.create({
+        ...data,
+        organizationId,
+        branchId,
+        memberNumber,
+        status: MEMBER_STATUSES.PENDING,
+        joiningDate: data.joiningDate || new Date(),
+      }, { transaction: t });
+
+      // 2. Auto-create ordinary savings account
+      await SavingsAccount.create({
+        organizationId,
+        branchId,
+        memberId: member.id,
+        accountNumber: generateAccountNumber('SAV'),
+        accountType: SAVINGS_ACCOUNT_TYPES.ORDINARY,
+        interestRate: 6.0,
+        minimumBalance: 0,
+        status: 'active',
+      }, { transaction: t });
+
+      // 3. Auto-create share capital account
+      await SavingsAccount.create({
+        organizationId,
+        branchId,
+        memberId: member.id,
+        accountNumber: generateAccountNumber('SHR'),
+        accountType: SAVINGS_ACCOUNT_TYPES.SHARE_CAPITAL,
+        interestRate: 0,
+        minimumBalance: 500,
+        status: 'active',
+      }, { transaction: t });
+
+      await t.commit();
+
+      // 4. Send welcome email
+      if (member.email) {
+        emailService.sendWelcomeEmail(member).catch((e) =>
+          logger.error('Welcome email failed:', e.message)
+        );
+      }
+
+      logger.info(`New member registered: ${memberNumber} in org ${organizationId}`);
+      return this.getById(member.id, organizationId);
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
+  }
+
+  async list(organizationId, query = {}) {
+    const { page, limit, offset } = getPagination(query);
+    const { rows: members, count: total } = await memberRepository.findByOrganizationPaginated(
+      organizationId, { limit, offset, search: query.search, status: query.status, branchId: query.branchId }
+    );
+    return { members, total, page, limit };
+  }
+
+  async getById(id, organizationId) {
+    const member = await memberRepository.findWithDetails(id);
+    if (!member || member.organizationId !== organizationId) throw new NotFoundError('Member not found.');
+    return member;
+  }
+
+  async update(id, organizationId, data, updatedBy) {
+    const member = await memberRepository.findOne({ where: { id, organizationId } });
+    if (!member) throw new NotFoundError('Member not found.');
+
+    // Prevent changing to a phone that belongs to another member
+    if (data.phone && data.phone !== member.phone) {
+      const exists = await memberRepository.findByPhone(data.phone, organizationId);
+      if (exists && exists.id !== id) throw new ConflictError('Phone number already used by another member.');
+    }
+
+    await member.update(data);
+    return this.getById(id, organizationId);
+  }
+
+  async activate(id, organizationId, activatedBy) {
+    const member = await memberRepository.findOne({ where: { id, organizationId } });
+    if (!member) throw new NotFoundError('Member not found.');
+    if (member.status === MEMBER_STATUSES.ACTIVE) throw new AppError('Member is already active.', 400);
+
+    await member.update({
+      status: MEMBER_STATUSES.ACTIVE,
+      activatedAt: new Date(),
+      activatedBy,
+    });
+    return member;
+  }
+
+  async suspend(id, organizationId, suspendedBy, reason) {
+    const member = await memberRepository.findOne({ where: { id, organizationId } });
+    if (!member) throw new NotFoundError('Member not found.');
+
+    // Cannot suspend a member with active loans
+    const activeLoans = await Loan.count({ where: { memberId: id, status: 'disbursed', organizationId } });
+    if (activeLoans > 0) throw new AppError('Cannot suspend member with active loans.', 400);
+
+    await member.update({
+      status: MEMBER_STATUSES.SUSPENDED,
+      suspendedAt: new Date(),
+      suspendedBy,
+      suspensionReason: reason,
+    });
+    return member;
+  }
+
+  async addNextOfKin(memberId, organizationId, data, addedBy) {
+    const member = await memberRepository.findOne({ where: { id: memberId, organizationId } });
+    if (!member) throw new NotFoundError('Member not found.');
+
+    // Only one primary next of kin allowed
+    if (data.isPrimary) {
+      await NextOfKin.update({ isPrimary: false }, { where: { memberId, organizationId } });
+    }
+
+    return NextOfKin.create({ ...data, memberId, organizationId });
+  }
+
+  async uploadDocument(memberId, organizationId, fileInfo, uploadedBy) {
+    const member = await memberRepository.findOne({ where: { id: memberId, organizationId } });
+    if (!member) throw new NotFoundError('Member not found.');
+
+    return MemberDocument.create({
+      memberId,
+      organizationId,
+      type: fileInfo.type,
+      fileName: fileInfo.filename,
+      filePath: fileInfo.path,
+      mimeType: fileInfo.mimetype,
+      fileSize: fileInfo.size,
+      uploadedBy,
+    });
+  }
+
+  async getStatement(memberId, organizationId, { startDate, endDate } = {}) {
+    const member = await this.getById(memberId, organizationId);
+    const accounts = await savingsAccountRepository.findByMember(memberId, organizationId);
+
+    const { SavingsTransaction } = await import('../models/index.js');
+    const { Op } = await import('sequelize');
+
+    const accountIds = accounts.map((a) => a.id);
+    const where = { savingsAccountId: { [Op.in]: accountIds } };
+    if (startDate) where.createdAt = { [Op.gte]: new Date(startDate) };
+    if (endDate) where.createdAt = { ...(where.createdAt || {}), [Op.lte]: new Date(endDate) };
+
+    const transactions = await SavingsTransaction.findAll({
+      where,
+      order: [['createdAt', 'ASC']],
+      include: [{ model: SavingsAccount, as: 'account', attributes: ['accountNumber', 'accountType'] }],
+    });
+
+    return { member, accounts, transactions };
+  }
+
+  async getStats(organizationId) {
+    return memberRepository.getStats(organizationId);
+  }
+}
+
+export default new MemberService();

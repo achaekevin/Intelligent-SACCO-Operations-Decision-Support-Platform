@@ -1,0 +1,268 @@
+{
+  "info": {
+    "name": "SACCO Management System API",
+    "description": "Complete REST API collection for the multi-tenant SACCO Management System.\n\nSetup:\n1. Import this collection into Postman\n2. Set environment variable `BASE_URL` to `http://localhost:5000/api/v1`\n3. Login with a demo account to auto-set `ACCESS_TOKEN`\n4. All subsequent requests use the token automatically",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "sacco-mgmt-collection-001",
+    "version": { "major": 1, "minor": 0, "patch": 0 }
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:5000/api/v1" },
+    { "key": "ACCESS_TOKEN", "value": "" },
+    { "key": "REFRESH_TOKEN", "value": "" },
+    { "key": "USER_ID", "value": "" },
+    { "key": "ORG_ID", "value": "11111111-1111-1111-1111-111111111111" },
+    { "key": "BRANCH_ID", "value": "22222222-2222-2222-2222-222222222222" },
+    { "key": "MEMBER_ID", "value": "66666666-6666-6666-6666-666666666666" },
+    { "key": "ACCOUNT_ID", "value": "88888888-8888-8888-8888-888888888881" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{ACCESS_TOKEN}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{BASE_URL}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Organization",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{BASE_URL}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orgName\": \"Umoja SACCO\",\n  \"orgCode\": \"UMOJA001\",\n  \"orgEmail\": \"admin@umoja.co.ke\",\n  \"orgPhone\": \"+254712000001\",\n  \"adminFirstName\": \"Grace\",\n  \"adminLastName\": \"Wanjiru\",\n  \"adminEmail\": \"admin@umoja.co.ke\",\n  \"adminPhone\": \"+254712000002\",\n  \"adminPassword\": \"Admin@1234!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data) {",
+                  "  pm.collectionVariables.set('ACCESS_TOKEN', res.data.accessToken);",
+                  "  pm.collectionVariables.set('REFRESH_TOKEN', res.data.refreshToken);",
+                  "  pm.collectionVariables.set('USER_ID', res.data.user.id);",
+                  "  pm.test('Login successful', () => pm.expect(res.success).to.be.true);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{BASE_URL}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@umojasacco.co.ke\",\n  \"password\": \"Admin@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": { "method": "GET", "url": "{{BASE_URL}}/auth/me" }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{BASE_URL}}/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{USER_ID}}\",\n  \"refreshToken\": \"{{REFRESH_TOKEN}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{BASE_URL}}/auth/forgot-password",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@umojasacco.co.ke\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/auth/change-password",
+            "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"Admin@1234\",\n  \"newPassword\": \"Admin@5678!\",\n  \"confirmPassword\": \"Admin@5678!\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": { "method": "POST", "url": "{{BASE_URL}}/auth/logout" }
+        }
+      ]
+    },
+    {
+      "name": "Organizations",
+      "item": [
+        { "name": "My Organization", "request": { "method": "GET", "url": "{{BASE_URL}}/organizations/me" } },
+        { "name": "Organization Stats", "request": { "method": "GET", "url": "{{BASE_URL}}/organizations/me/stats" } },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE_URL}}/organizations/me/settings",
+            "body": { "mode": "raw", "raw": "{\n  \"currency\": \"KES\",\n  \"timezone\": \"Africa/Nairobi\",\n  \"interestMethod\": \"reducing_balance\",\n  \"enableMpesa\": true,\n  \"loanApprovalLevels\": 2\n}", "options": { "raw": { "language": "json" } } }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Branches",
+      "item": [
+        { "name": "List Branches", "request": { "method": "GET", "url": { "raw": "{{BASE_URL}}/branches?page=1&limit=10", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] } } },
+        {
+          "name": "Create Branch",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/branches",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Westlands Branch\",\n  \"code\": \"BR003\",\n  \"email\": \"westlands@sacco.co.ke\",\n  \"phone\": \"+254712000099\",\n  \"county\": \"Nairobi\",\n  \"town\": \"Westlands\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        { "name": "Get Branch", "request": { "method": "GET", "url": "{{BASE_URL}}/branches/{{BRANCH_ID}}" } },
+        { "name": "Branch Stats", "request": { "method": "GET", "url": "{{BASE_URL}}/branches/{{BRANCH_ID}}/stats" } }
+      ]
+    },
+    {
+      "name": "Members",
+      "item": [
+        { "name": "List Members", "request": { "method": "GET", "url": { "raw": "{{BASE_URL}}/members?page=1&limit=10&status=active", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "status", "value": "active" }] } } },
+        { "name": "Member Stats", "request": { "method": "GET", "url": "{{BASE_URL}}/members/stats" } },
+        {
+          "name": "Register Member",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/members",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Mary\",\n  \"lastName\": \"Kamau\",\n  \"phone\": \"0712500001\",\n  \"nationalId\": \"34567890\",\n  \"email\": \"mary.kamau@gmail.com\",\n  \"branchId\": \"{{BRANCH_ID}}\",\n  \"gender\": \"female\",\n  \"occupation\": \"Teacher\",\n  \"county\": \"Nairobi\",\n  \"town\": \"Westlands\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        { "name": "Get Member", "request": { "method": "GET", "url": "{{BASE_URL}}/members/{{MEMBER_ID}}" } },
+        {
+          "name": "Activate Member",
+          "request": { "method": "PATCH", "url": "{{BASE_URL}}/members/{{MEMBER_ID}}/activate" }
+        },
+        {
+          "name": "Suspend Member",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE_URL}}/members/{{MEMBER_ID}}/suspend",
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Repeated loan defaults without communication for over 6 months\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        {
+          "name": "Add Next of Kin",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/members/{{MEMBER_ID}}/next-of-kin",
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Mwangi\",\n  \"relationship\": \"Spouse\",\n  \"phone\": \"0723456789\",\n  \"sharePercentage\": 100,\n  \"isPrimary\": true\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        { "name": "Member Statement", "request": { "method": "GET", "url": { "raw": "{{BASE_URL}}/members/{{MEMBER_ID}}/statement?startDate=2024-01-01&endDate=2024-12-31", "query": [{ "key": "startDate", "value": "2024-01-01" }, { "key": "endDate", "value": "2024-12-31" }] } } }
+      ]
+    },
+    {
+      "name": "Savings",
+      "item": [
+        { "name": "List Accounts", "request": { "method": "GET", "url": { "raw": "{{BASE_URL}}/savings/accounts?page=1&limit=10", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] } } },
+        { "name": "Get Account", "request": { "method": "GET", "url": "{{BASE_URL}}/savings/accounts/{{ACCOUNT_ID}}" } },
+        { "name": "Member Accounts", "request": { "method": "GET", "url": "{{BASE_URL}}/savings/members/{{MEMBER_ID}}/accounts" } },
+        {
+          "name": "Open Account",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/savings/accounts",
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": \"{{MEMBER_ID}}\",\n  \"branchId\": \"{{BRANCH_ID}}\",\n  \"accountType\": \"ordinary\",\n  \"interestRate\": 6.0\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        {
+          "name": "Deposit",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/savings/deposit",
+            "body": { "mode": "raw", "raw": "{\n  \"accountId\": \"{{ACCOUNT_ID}}\",\n  \"amount\": 10000,\n  \"paymentMethod\": \"mpesa\",\n  \"externalReference\": \"QF12XY3ABC\",\n  \"description\": \"Monthly savings\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        {
+          "name": "Withdraw",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/savings/withdraw",
+            "body": { "mode": "raw", "raw": "{\n  \"accountId\": \"{{ACCOUNT_ID}}\",\n  \"amount\": 5000,\n  \"paymentMethod\": \"cash\",\n  \"description\": \"Emergency withdrawal\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        {
+          "name": "Transfer",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/savings/transfer",
+            "body": { "mode": "raw", "raw": "{\n  \"fromAccountId\": \"{{ACCOUNT_ID}}\",\n  \"toAccountId\": \"88888888-8888-8888-8888-888888888882\",\n  \"amount\": 2000,\n  \"description\": \"Transfer to friend\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        { "name": "List Transactions", "request": { "method": "GET", "url": { "raw": "{{BASE_URL}}/savings/transactions?page=1&limit=20&type=deposit", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }, { "key": "type", "value": "deposit" }] } } },
+        { "name": "Account Transactions", "request": { "method": "GET", "url": "{{BASE_URL}}/savings/accounts/{{ACCOUNT_ID}}/transactions" } }
+      ]
+    },
+    {
+      "name": "Loans (Stub)",
+      "item": [
+        { "name": "List Loans", "request": { "method": "GET", "url": "{{BASE_URL}}/loans" } },
+        {
+          "name": "Apply Loan",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/loans/apply",
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": \"{{MEMBER_ID}}\",\n  \"loanProductId\": \"<loanProductId>\",\n  \"principalAmount\": 100000,\n  \"termMonths\": 12,\n  \"purpose\": \"Tuition fees for university\"\n}", "options": { "raw": { "language": "json" } } }
+          }
+        },
+        { "name": "Approve Loan", "request": { "method": "PATCH", "url": "{{BASE_URL}}/loans/:id/approve" } },
+        { "name": "Disburse Loan", "request": { "method": "PATCH", "url": "{{BASE_URL}}/loans/:id/disburse" } },
+        { "name": "Loan Schedule", "request": { "method": "GET", "url": "{{BASE_URL}}/loans/:id/schedule" } }
+      ]
+    },
+    {
+      "name": "Notifications (Stub)",
+      "item": [
+        { "name": "List Notifications", "request": { "method": "GET", "url": "{{BASE_URL}}/notifications" } },
+        { "name": "Unread Count", "request": { "method": "GET", "url": "{{BASE_URL}}/notifications/unread-count" } },
+        { "name": "Mark All Read", "request": { "method": "PATCH", "url": "{{BASE_URL}}/notifications/read-all" } }
+      ]
+    },
+    {
+      "name": "Audit Logs (Stub)",
+      "item": [
+        { "name": "List Audit Logs", "request": { "method": "GET", "url": { "raw": "{{BASE_URL}}/audit-logs?page=1&limit=20", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }] } } }
+      ]
+    }
+  ]
+}
