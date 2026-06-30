@@ -75,24 +75,24 @@ const Register = () => {
       <div className="absolute top-20 left-20 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-700"></div>
 
-      <div className="relative z-10 w-full max-w-4xl">
+      <div className="relative z-10 w-full max-w-4xl px-4">
         {/* Back to Login Link */}
-        <Link to="/login" className="inline-flex items-center gap-2 text-slate-300 hover:text-white mb-6 transition">
+        <Link to="/login" className="inline-flex items-center gap-2 text-slate-300 hover:text-white mb-4 md:mb-6 transition text-sm md:text-base">
           <ArrowLeft className="w-4 h-4" />
           Back to login
         </Link>
 
         {/* Registration Card */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 md:p-12 border border-white/20 shadow-2xl">
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 md:mb-8">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Building2 className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Building2 className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Register Your SACCO</h1>
-            <p className="text-slate-300">Join Amana SACCO Platform and transform your cooperative management</p>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">Register Your SACCO</h1>
+            <p className="text-slate-300 text-sm md:text-base">Join Amana SACCO Platform and transform your cooperative management</p>
           </div>
 
           {/* Form */}

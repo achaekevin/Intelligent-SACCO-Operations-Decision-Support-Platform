@@ -62,38 +62,38 @@ const Login = () => {
       <div className="absolute top-20 left-20 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-700"></div>
 
-      <div className="relative z-10 min-h-screen flex">
+      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
         {/* Left Side - Hero Content */}
-        <div className="flex-1 flex flex-col justify-between p-12">
+        <div className="flex-1 flex flex-col justify-between p-6 md:p-12">
           {/* Top Section - Partner Carousel */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Shield className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Shield className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-white font-bold text-xl">Amana</h2>
+                <h2 className="text-white font-bold text-lg md:text-xl">Amana</h2>
                 <p className="text-slate-400 text-xs">SACCO Management Platform</p>
               </div>
             </div>
 
             {/* Partners Carousel */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 md:p-6 border border-white/10">
+              <div className="flex items-center justify-between mb-3 md:mb-4">
                 <button onClick={prevPartner} className="p-2 hover:bg-white/10 rounded-lg transition">
-                  <ChevronLeft className="w-5 h-5 text-white" />
+                  <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </button>
                 <div className="text-center flex-1">
-                  <h3 className="text-white font-semibold text-lg">{partners[currentPartner].name}</h3>
-                  <div className="flex items-center justify-center gap-2 mt-1">
-                    <MapPin className="w-4 h-4 text-teal-400" />
-                    <span className="text-slate-300 text-sm">{partners[currentPartner].location}</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-teal-400 text-sm font-medium">{partners[currentPartner].members} members</span>
+                  <h3 className="text-white font-semibold text-base md:text-lg">{partners[currentPartner].name}</h3>
+                  <div className="flex items-center justify-center gap-2 mt-1 flex-wrap">
+                    <MapPin className="w-3 h-3 md:w-4 md:h-4 text-teal-400" />
+                    <span className="text-slate-300 text-xs md:text-sm">{partners[currentPartner].location}</span>
+                    <span className="text-slate-500 hidden sm:inline">•</span>
+                    <span className="text-teal-400 text-xs md:text-sm font-medium">{partners[currentPartner].members} members</span>
                   </div>
                 </div>
                 <button onClick={nextPartner} className="p-2 hover:bg-white/10 rounded-lg transition">
-                  <ChevronRight className="w-5 h-5 text-white" />
+                  <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </button>
               </div>
               <div className="flex items-center justify-center gap-2">
@@ -108,60 +108,60 @@ const Login = () => {
             </div>
 
             {/* Trust Badge */}
-            <div className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 rounded-full px-4 py-2">
-              <CheckCircle className="w-4 h-4 text-teal-400" />
-              <span className="text-teal-300 text-sm font-medium">Trusted by 1000+ SACCOs Across Kenya</span>
+            <div className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 rounded-full px-3 md:px-4 py-2">
+              <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-teal-400" />
+              <span className="text-teal-300 text-xs md:text-sm font-medium">Trusted by 1000+ SACCOs Across Kenya</span>
             </div>
           </div>
 
           {/* Middle Section - Main Content */}
-          <div className="space-y-8 max-w-2xl">
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight">
+          <div className="space-y-6 md:space-y-8 max-w-2xl mt-8 lg:mt-0">
+            <div className="space-y-3 md:space-y-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                 Transform Your SACCO Management
               </h1>
-              <p className="text-xl text-slate-300 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-slate-300 leading-relaxed">
                 Join Kenya's leading co-operatives in streamlining membership, managing loans, and accelerating economic growth
               </p>
             </div>
 
             {/* Feature Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
               {features.map((feature, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all hover:scale-105 hover:shadow-2xl cursor-pointer"
+                  className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 md:p-6 hover:bg-white/10 transition-all hover:scale-105 hover:shadow-2xl cursor-pointer"
                 >
-                  <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <feature.icon className="w-6 h-6 text-white" />
+                  <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${feature.color} rounded-lg flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform`}>
+                    <feature.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
-                  <h3 className="text-white font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-slate-400 text-sm">{feature.description}</p>
+                  <h3 className="text-white font-semibold text-sm md:text-base mb-2">{feature.title}</h3>
+                  <p className="text-slate-400 text-xs md:text-sm">{feature.description}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Bottom Section - Footer */}
-          <div className="text-slate-500 text-sm">
+          <div className="text-slate-500 text-xs md:text-sm mt-8 lg:mt-0">
             © 2026 Amana SACCO Platform. All rights reserved.
           </div>
         </div>
 
         {/* Right Side - Login Panel */}
-        <div className="w-full md:w-[480px] flex items-center justify-center p-8">
-          <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
+        <div className="w-full lg:w-[480px] flex items-center justify-center p-6 md:p-8">
+          <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-white/20 shadow-2xl">
             {/* Logo */}
-            <div className="flex items-center justify-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Shield className="w-8 h-8 text-white" />
+            <div className="flex items-center justify-center mb-6 md:mb-8">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Shield className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
             </div>
 
             {/* Header */}
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">Welcome back to Amana</h2>
-              <p className="text-slate-300">Sign in to access your secure SACCO dashboard</p>
+            <div className="text-center mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Welcome back to Amana</h2>
+              <p className="text-slate-300 text-sm md:text-base">Sign in to access your secure SACCO dashboard</p>
             </div>
 
             {/* Form */}
