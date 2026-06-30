@@ -36,7 +36,7 @@ module.exports = {
     phone: { type: Sequelize.STRING(20), allowNull: false },
     password: { type: Sequelize.STRING(255), allowNull: false },
     role: {
-      type: Sequelize.ENUM('super_admin','sacco_admin','branch_manager','loan_officer','accountant','cashier','auditor','member'),
+      type: Sequelize.ENUM('sacco_admin','loan_officer','cashier','auditor','member'),
       allowNull: false,
     },
     avatar: { type: Sequelize.STRING(500), allowNull: true },

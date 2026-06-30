@@ -21,7 +21,7 @@ const ReportsHub = () => {
   const [modalOpen, setModalOpen] = useState(false)
 
   // Check if the logged-in user is an Admin
-  const isAdmin = user?.role === ROLES.SUPER_ADMIN || user?.role === ROLES.SACCO_ADMIN
+  const isAdmin = user?.role === ROLES.SACCO_ADMIN
 
   const REPORTS = [
     {

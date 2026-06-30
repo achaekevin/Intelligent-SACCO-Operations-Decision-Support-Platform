@@ -36,7 +36,7 @@ const upload = multer({
 const router = Router();
 router.use(authenticate, tenantIsolation);
 
-const staffRoles = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER, ROLES.LOAN_OFFICER, ROLES.CASHIER];
+const staffRoles = [ROLES.SACCO_ADMIN, ROLES.LOAN_OFFICER, ROLES.CASHIER];
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ router.put('/:id',
  *     security: [{ bearerAuth: [] }]
  */
 router.patch('/:id/activate',
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER),
+  authorize(ROLES.SACCO_ADMIN),
   auditLog('approve', 'member'),
   memberController.activate,
 );
@@ -143,7 +143,7 @@ router.patch('/:id/activate',
  *     security: [{ bearerAuth: [] }]
  */
 router.patch('/:id/suspend',
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER),
+  authorize(ROLES.SACCO_ADMIN),
   validate(suspendMemberSchema),
   auditLog('update', 'member'),
   memberController.suspend,

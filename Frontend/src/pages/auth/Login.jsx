@@ -16,7 +16,7 @@ const schema = yup.object({
 })
 
 const partners = [
-  { name: 'Unitas SACCO', location: 'Nairobi', members: '8,500+' },
+  { name: 'Amana SACCO', location: 'Nairobi', members: '8,500+' },
   { name: 'Unity Credit Partners', location: 'Mombasa', members: '12,300+' },
   { name: 'Community Growth Fund', location: 'Kisumu', members: '6,800+' },
 ]
@@ -72,7 +72,7 @@ const Login = () => {
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-white font-bold text-xl">Unitas</h2>
+                <h2 className="text-white font-bold text-xl">Amana</h2>
                 <p className="text-slate-400 text-xs">SACCO Management Platform</p>
               </div>
             </div>
@@ -144,7 +144,7 @@ const Login = () => {
 
           {/* Bottom Section - Footer */}
           <div className="text-slate-500 text-sm">
-            © 2024 Unitas SACCO Platform. All rights reserved.
+            © 2026 Amana SACCO Platform. All rights reserved.
           </div>
         </div>
 
@@ -160,7 +160,7 @@ const Login = () => {
 
             {/* Header */}
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">Welcome back to Unitas</h2>
+              <h2 className="text-3xl font-bold text-white mb-2">Welcome back to Amana</h2>
               <p className="text-slate-300">Sign in to access your secure SACCO dashboard</p>
             </div>
 

@@ -6,7 +6,7 @@ import { ROLES } from '../constants/index.js';
 const router = Router();
 router.use(authenticate, tenantIsolation);
 
-const auditors = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.AUDITOR];
+const auditors = [ROLES.SACCO_ADMIN, ROLES.AUDITOR];
 
 /**
  * @swagger

@@ -47,7 +47,7 @@ router.get('/', branchController.list);
  *     security: [{ bearerAuth: [] }]
  */
 router.post('/',
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   validate(createBranchSchema),
   auditLog('create', 'branch'),
   branchController.create,
@@ -72,7 +72,7 @@ router.get('/:id', branchController.getById);
  *     security: [{ bearerAuth: [] }]
  */
 router.put('/:id',
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   validate(updateBranchSchema),
   auditLog('update', 'branch'),
   branchController.update,
@@ -87,7 +87,7 @@ router.put('/:id',
  *     security: [{ bearerAuth: [] }]
  */
 router.delete('/:id',
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   auditLog('delete', 'branch'),
   branchController.delete,
 );
@@ -111,7 +111,7 @@ router.get('/:id/stats', branchController.getStats);
  *     security: [{ bearerAuth: [] }]
  */
 router.patch('/:id/assign-manager',
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   validate(assignManagerSchema),
   auditLog('update', 'branch'),
   branchController.assignManager,

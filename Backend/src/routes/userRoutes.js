@@ -33,7 +33,7 @@ const updateUserSchema = Joi.object({
 const router = Router();
 router.use(authenticate, tenantIsolation);
 
-const admins = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN];
+const admins = [ROLES.SACCO_ADMIN];
 
 /**
  * @swagger
@@ -88,17 +88,12 @@ router.get('/', authorize(...admins), async (req, res, next) => {
  *               lastName:  { type: string }
  *               email:     { type: string, format: email }
  *               phone:     { type: string }
- *               role:      { type: string, enum: [sacco_admin, branch_manager, loan_officer, accountant, cashier, auditor] }
+ *               role:      { type: string, enum: [sacco_admin, loan_officer, cashier, auditor] }
  *               branchId:  { type: string, format: uuid }
  */
 router.post('/', authorize(...admins), validate(createUserSchema), auditLog('create', 'user'), async (req, res, next) => {
   try {
     const { firstName, lastName, email, phone, role, branchId, password } = req.body;
-
-    // Prevent creating a super_admin from within a SACCO
-    if (role === ROLES.SUPER_ADMIN && req.user.role !== ROLES.SUPER_ADMIN) {
-      return res.status(403).json({ success: false, message: 'Cannot create a Super Admin.', errors: [] });
-    }
 
     const existing = await User.findOne({ where: { email: email.toLowerCase() } });
     if (existing) throw new ConflictError('A user with this email already exists.');
@@ -221,7 +216,7 @@ router.patch('/:id/activate', authorize(...admins), auditLog('update', 'user'), 
  *     tags: [Users]
  *     security: [{ bearerAuth: [] }]
  */
-router.delete('/:id', authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN), auditLog('delete', 'user'), async (req, res, next) => {
+router.delete('/:id', authorize(ROLES.SACCO_ADMIN), auditLog('delete', 'user'), async (req, res, next) => {
   try {
     const user = await User.findOne({ where: { id: req.params.id, organizationId: req.user.organizationId } });
     if (!user) return notFoundResponse(res, 'User not found.');

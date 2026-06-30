@@ -31,7 +31,7 @@ export const authenticate = async (req, res, next) => {
 
 /**
  * Role-based access control middleware factory.
- * Usage: authorize(ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER)
+ * Usage: authorize(ROLES.SACCO_ADMIN, ROLES.LOAN_OFFICER)
  */
 export const authorize = (...allowedRoles) => (req, res, next) => {
   if (!req.user) return next(new UnauthorizedError());

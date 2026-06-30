@@ -32,7 +32,7 @@ class BranchRepository extends BaseRepository {
 
   async findWithManager(branchId) {
     return Branch.findByPk(branchId, {
-      include: [{ model: User, as: 'users', where: { role: 'branch_manager' }, required: false }],
+      include: [{ model: User, as: 'users', where: { role: 'sacco_admin' }, required: false }],
     });
   }
 

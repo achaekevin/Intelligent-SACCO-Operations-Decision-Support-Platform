@@ -1,11 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 
 const ROLES = [
-  { id: uuidv4(), name: 'Super Admin',     slug: 'super_admin',     description: 'Full system access',                isSystem: true },
-  { id: uuidv4(), name: 'SACCO Admin',     slug: 'sacco_admin',     description: 'Full access within one SACCO',      isSystem: true },
-  { id: uuidv4(), name: 'Branch Manager',  slug: 'branch_manager',  description: 'Manage one branch',                 isSystem: true },
+  { id: uuidv4(), name: 'SACCO Admin',     slug: 'sacco_admin',     description: 'Full access within SACCO',         isSystem: true },
   { id: uuidv4(), name: 'Loan Officer',    slug: 'loan_officer',    description: 'Manage loan applications',          isSystem: true },
-  { id: uuidv4(), name: 'Accountant',      slug: 'accountant',      description: 'Manage accounting records',         isSystem: true },
   { id: uuidv4(), name: 'Cashier',         slug: 'cashier',         description: 'Process deposits and withdrawals',  isSystem: true },
   { id: uuidv4(), name: 'Auditor',         slug: 'auditor',         description: 'Read-only audit access',            isSystem: true },
   { id: uuidv4(), name: 'Member',          slug: 'member',          description: 'Member self-service portal',        isSystem: true },

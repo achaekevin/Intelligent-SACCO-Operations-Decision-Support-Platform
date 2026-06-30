@@ -13,9 +13,9 @@ import { ROLES } from '../constants/index.js';
 const router = Router();
 router.use(authenticate, tenantIsolation);
 
-const loanOfficers = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER, ROLES.LOAN_OFFICER];
-const approvers   = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER];
-const cashiers    = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER, ROLES.CASHIER, ROLES.ACCOUNTANT];
+const loanOfficers = [ROLES.SACCO_ADMIN, ROLES.LOAN_OFFICER];
+const approvers   = [ROLES.SACCO_ADMIN];
+const cashiers    = [ROLES.SACCO_ADMIN, ROLES.CASHIER];
 
 /**
  * @swagger

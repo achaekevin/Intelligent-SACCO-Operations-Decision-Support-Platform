@@ -7,7 +7,7 @@ import { successResponse, createdResponse, paginatedResponse, notFoundResponse }
 const router = Router();
 router.use(authenticate, tenantIsolation);
 
-const accountants = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.ACCOUNTANT, ROLES.AUDITOR];
+const accountants = [ROLES.SACCO_ADMIN, ROLES.AUDITOR];
 
 /**
  * @swagger
@@ -43,7 +43,7 @@ router.get('/accounts', authorize(...accountants), async (req, res, next) => {
  *     tags: [Accounting]
  *     security: [{ bearerAuth: [] }]
  */
-router.post('/accounts', authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.ACCOUNTANT), async (req, res, next) => {
+router.post('/accounts', authorize(ROLES.SACCO_ADMIN), async (req, res, next) => {
   try {
     const { code, name, type, category, normalBalance, parentId, description } = req.body;
     const existing = await Account.findOne({ where: { organizationId: req.user.organizationId, code } });
@@ -137,7 +137,7 @@ router.get('/journal-entries', authorize(...accountants), async (req, res, next)
  *                     type: { type: string, enum: [debit, credit] }
  *                     amount: { type: number }
  */
-router.post('/journal-entries', authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.ACCOUNTANT), async (req, res, next) => {
+router.post('/journal-entries', authorize(ROLES.SACCO_ADMIN), async (req, res, next) => {
   try {
     const accountingService = (await import('../services/accountingService.js')).default;
     const entry = await accountingService.post({

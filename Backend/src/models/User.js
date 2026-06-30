@@ -10,7 +10,7 @@ const User = sequelize.define('User', {
   },
   organizationId: {
     type: DataTypes.UUID,
-    allowNull: true, // null for super_admin
+    allowNull: false,
     references: { model: 'organizations', key: 'id' },
   },
   branchId: {
@@ -52,8 +52,7 @@ const User = sequelize.define('User', {
   },
   role: {
     type: DataTypes.ENUM(
-      'super_admin', 'sacco_admin', 'branch_manager',
-      'loan_officer', 'accountant', 'cashier', 'auditor', 'member'
+      'sacco_admin', 'loan_officer', 'cashier', 'auditor', 'member'
     ),
     allowNull: false,
   },

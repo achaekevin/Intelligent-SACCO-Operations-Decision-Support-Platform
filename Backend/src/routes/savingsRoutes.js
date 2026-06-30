@@ -12,7 +12,7 @@ import { ROLES } from '../constants/index.js';
 const router = Router();
 router.use(authenticate, tenantIsolation);
 
-const tellers = [ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.BRANCH_MANAGER, ROLES.CASHIER, ROLES.ACCOUNTANT];
+const tellers = [ROLES.SACCO_ADMIN, ROLES.CASHIER];
 
 /**
  * @swagger
@@ -167,7 +167,7 @@ router.get('/transactions',
  *     security: [{ bearerAuth: [] }]
  */
 router.post('/transactions/:transactionId/reverse',
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN, ROLES.ACCOUNTANT),
+  authorize(ROLES.SACCO_ADMIN),
   validate(reversalSchema),
   auditLog('update', 'savings'),
   savingsController.reverseTransaction,

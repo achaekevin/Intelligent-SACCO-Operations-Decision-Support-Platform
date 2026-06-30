@@ -1,10 +1,7 @@
 // ─── User Roles ───────────────────────────────────────────────
 export const ROLES = {
-  SUPER_ADMIN: 'super_admin',
   SACCO_ADMIN: 'sacco_admin',
-  BRANCH_MANAGER: 'branch_manager',
   LOAN_OFFICER: 'loan_officer',
-  ACCOUNTANT: 'accountant',
   CASHIER: 'cashier',
   AUDITOR: 'auditor',
   MEMBER: 'member',

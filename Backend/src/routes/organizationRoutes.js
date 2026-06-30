@@ -30,7 +30,7 @@ const router = Router();
  */
 router.get('/',
   authenticate,
-  authorize(ROLES.SUPER_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   organizationController.list,
 );
 
@@ -86,7 +86,7 @@ router.get('/me/stats',
 router.patch('/me/settings',
   authenticate,
   tenantIsolation,
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   auditLog('update', 'organization'),
   organizationController.updateSettings,
 );
@@ -102,7 +102,7 @@ router.patch('/me/settings',
 router.put('/me',
   authenticate,
   tenantIsolation,
-  authorize(ROLES.SUPER_ADMIN, ROLES.SACCO_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   auditLog('update', 'organization'),
   organizationController.update,
 );
@@ -117,7 +117,7 @@ router.put('/me',
  */
 router.get('/:id',
   authenticate,
-  authorize(ROLES.SUPER_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   organizationController.getById,
 );
 
@@ -131,7 +131,7 @@ router.get('/:id',
  */
 router.put('/:id',
   authenticate,
-  authorize(ROLES.SUPER_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   auditLog('update', 'organization'),
   organizationController.update,
 );
@@ -154,7 +154,7 @@ router.put('/:id',
  */
 router.patch('/:id/status',
   authenticate,
-  authorize(ROLES.SUPER_ADMIN),
+  authorize(ROLES.SACCO_ADMIN),
   auditLog('update', 'organization'),
   organizationController.updateStatus,
 );
