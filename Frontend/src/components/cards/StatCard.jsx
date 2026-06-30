@@ -1,7 +1,9 @@
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { classNames } from '../../utils/format'
 
-const StatCard = ({ label, value, icon: Icon, trend, trendValue, accent = 'teal' }) => {
+const StatCard = ({ label, value, icon: Icon, trend, trendValue, accent = 'teal', onClick, href }) => {
+  const navigate = useNavigate()
   const isUp = trend === 'up'
   const accents = {
     teal: 'bg-teal-50 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300',
@@ -10,8 +12,24 @@ const StatCard = ({ label, value, icon: Icon, trend, trendValue, accent = 'teal'
     danger: 'bg-danger-light text-danger',
   }
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    } else if (href) {
+      navigate(href)
+    }
+  }
+
+  const isClickable = onClick || href
+
   return (
-    <div className="bg-white dark:bg-ink-800 rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-shadow border border-ink-50 dark:border-ink-700 relative overflow-hidden">
+    <div
+      onClick={handleClick}
+      className={classNames(
+        'bg-white dark:bg-ink-800 rounded-2xl p-5 shadow-card transition-all border border-ink-50 dark:border-ink-700 relative overflow-hidden',
+        isClickable && 'cursor-pointer hover:shadow-card-hover hover:scale-[1.02] hover:border-teal-200 dark:hover:border-teal-700'
+      )}
+    >
       <div className="absolute top-0 left-0 h-1 w-full bg-ledger-stripe" />
       <div className="flex items-start justify-between">
         <div>

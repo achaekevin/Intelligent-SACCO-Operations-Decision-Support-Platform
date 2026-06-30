@@ -49,14 +49,14 @@ const Dashboard = () => {
           Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
         ) : (
           <>
-            <StatCard label="Total Members" value={formatNumber(DASHBOARD_STATS.totalMembers)} icon={Users} trend="up" trendValue="+4.2%" accent="teal" />
-            <StatCard label="Total Savings" value={formatKES(DASHBOARD_STATS.totalSavings)} icon={PiggyBank} trend="up" trendValue="+6.8%" accent="gold" />
-            <StatCard label="Active Loans" value={formatNumber(DASHBOARD_STATS.activeLoans)} icon={HandCoins} trend="up" trendValue="+2.1%" accent="info" />
-            <StatCard label="Pending Loans" value={formatNumber(DASHBOARD_STATS.pendingLoans)} icon={Clock} trend="down" trendValue="-1.4%" accent="gold" />
-            <StatCard label="Total Deposits (MTD)" value={formatKES(DASHBOARD_STATS.totalDeposits)} icon={Wallet} trend="up" trendValue="+3.6%" accent="teal" />
-            <StatCard label="Monthly Income" value={formatKES(DASHBOARD_STATS.monthlyIncome)} icon={TrendingUp} trend="up" trendValue="+5.9%" accent="info" />
-            <StatCard label="Total Branches" value={DASHBOARD_STATS.totalBranches} icon={Landmark} accent="teal" />
-            <StatCard label="Loan Default Rate" value={`${DASHBOARD_STATS.loanDefaults}%`} icon={AlertTriangle} trend="down" trendValue="-0.5%" accent="danger" />
+            <StatCard label="Total Members" value={formatNumber(DASHBOARD_STATS.totalMembers)} icon={Users} trend="up" trendValue="+4.2%" accent="teal" href="/members" />
+            <StatCard label="Total Savings" value={formatKES(DASHBOARD_STATS.totalSavings)} icon={PiggyBank} trend="up" trendValue="+6.8%" accent="gold" href="/savings" />
+            <StatCard label="Active Loans" value={formatNumber(DASHBOARD_STATS.activeLoans)} icon={HandCoins} trend="up" trendValue="+2.1%" accent="info" href="/loans" />
+            <StatCard label="Pending Loans" value={formatNumber(DASHBOARD_STATS.pendingLoans)} icon={Clock} trend="down" trendValue="-1.4%" accent="gold" href="/loans?status=pending" />
+            <StatCard label="Total Deposits (MTD)" value={formatKES(DASHBOARD_STATS.totalDeposits)} icon={Wallet} trend="up" trendValue="+3.6%" accent="teal" href="/savings/deposits" />
+            <StatCard label="Monthly Income" value={formatKES(DASHBOARD_STATS.monthlyIncome)} icon={TrendingUp} trend="up" trendValue="+5.9%" accent="info" href="/accounting/income-expenses" />
+            <StatCard label="Total Branches" value={DASHBOARD_STATS.totalBranches} icon={Landmark} accent="teal" href="/branches" />
+            <StatCard label="Loan Default Rate" value={`${DASHBOARD_STATS.loanDefaults}%`} icon={AlertTriangle} trend="down" trendValue="-0.5%" accent="danger" href="/loans?status=defaulted" />
           </>
         )}
       </div>
