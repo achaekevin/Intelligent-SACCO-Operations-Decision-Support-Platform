@@ -23,7 +23,7 @@ const partners = [
 
 const features = [
   { icon: Users, title: 'Member Management', description: 'Streamline membership & contributions', color: 'from-blue-500 to-blue-600' },
-  { icon: HandShake, title: 'Loan & Credit Services', description: 'Efficient loan processing & tracking', color: 'from-purple-500 to-purple-600' },
+  { icon: Handshake, title: 'Loan & Credit Services', description: 'Efficient loan processing & tracking', color: 'from-purple-500 to-purple-600' },
   { icon: TrendingUp, title: 'Financial Reporting', description: 'Real-time insights & analytics', color: 'from-green-500 to-green-600' },
 ]
 
