@@ -48,11 +48,7 @@ const bootstrap = async () => {
 
     // 6. BullMQ workers
     if (process.env.NODE_ENV !== 'test') {
-      try {
-        startWorkers();
-      } catch (err) {
-        logger.warn('⚠️  BullMQ workers disabled (Redis version < 5.0.0 required). Background jobs will not run.');
-      }
+      await startWorkers();
     }
 
     // 7. Scheduled jobs
