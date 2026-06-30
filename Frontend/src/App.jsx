@@ -10,6 +10,7 @@ import MemberLayout from './layouts/MemberLayout'
 // Auth pages
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
+import MemberRegister from './pages/auth/MemberRegister'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword'
 import ChangePassword from './pages/auth/ChangePassword'
@@ -92,6 +93,7 @@ function App() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/join-member" element={<MemberRegister />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
       </Route>

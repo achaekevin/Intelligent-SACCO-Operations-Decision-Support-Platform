@@ -1,12 +1,126 @@
-import { sequelize, Member, User, NextOfKin, MemberDocument, SavingsAccount, Loan } from '../models/index.js';
+import { sequelize, Member, User, NextOfKin, MemberDocument, SavingsAccount, Loan, Role, Organization, Branch } from '../models/index.js';
 import { memberRepository, savingsAccountRepository } from '../repositories/index.js';
 import { NotFoundError, ConflictError, AppError } from '../utils/errors.js';
 import { generateMemberNumber, generateAccountNumber, getPagination, getOrderClause } from '../utils/helpers.js';
-import { SAVINGS_ACCOUNT_TYPES, MEMBER_STATUSES } from '../constants/index.js';
+import { SAVINGS_ACCOUNT_TYPES, MEMBER_STATUSES, ROLES } from '../constants/index.js';
 import emailService from './emailService.js';
 import logger from '../utils/logger.js';
 
 class MemberService {
+  async selfRegister(data) {
+    const { firstName, lastName, email, phone, nationalId, dateOfBirth, address, password } = data;
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
+    if (existingUser) {
+      throw new ConflictError('A user with this email already exists.');
+    }
+
+    // For self-registration, we need to assign them to the first active organization
+    // In a real-world scenario, you might want to have a way to select the organization
+    const organization = await Organization.findOne({ where: { status: 'active' } });
+    if (!organization) {
+      throw new AppError('No active SACCO found. Please contact support.', 400);
+    }
+
+    // Get the main branch or first active branch
+    const branch = await Branch.findOne({ 
+      where: { organizationId: organization.id, status: 'active' },
+      order: [['isHeadquarters', 'DESC']]
+    });
+    if (!branch) {
+      throw new AppError('No active branch found. Please contact support.', 400);
+    }
+
+    const t = await sequelize.transaction();
+    try {
+      // Check for duplicate phone/nationalId in this organization
+      const phoneExists = await Member.findOne({ 
+        where: { phone, organizationId: organization.id } 
+      });
+      if (phoneExists) {
+        throw new ConflictError('A member with this phone number already exists.');
+      }
+
+      const idExists = await Member.findOne({ 
+        where: { nationalId, organizationId: organization.id } 
+      });
+      if (idExists) {
+        throw new ConflictError('A member with this national ID already exists.');
+      }
+
+      // Generate member number
+      const sequence = await memberRepository.getNextSequence(organization.id);
+      const memberNumber = generateMemberNumber(sequence);
+
+      // 1. Create member with pending status
+      const member = await Member.create({
+        organizationId: organization.id,
+        branchId: branch.id,
+        firstName,
+        lastName,
+        email: email.toLowerCase(),
+        phone,
+        nationalId,
+        dateOfBirth,
+        address,
+        memberNumber,
+        status: MEMBER_STATUSES.PENDING,
+        joiningDate: new Date(),
+      }, { transaction: t });
+
+      // 2. Find or create Member role
+      const [memberRole] = await Role.findOrCreate({
+        where: { slug: ROLES.MEMBER, organizationId: organization.id },
+        defaults: { 
+          name: 'Member', 
+          slug: ROLES.MEMBER, 
+          description: 'Member self-service portal',
+          isSystem: true 
+        },
+        transaction: t
+      });
+
+      // 3. Create user account (inactive until approved)
+      await User.create({
+        organizationId: organization.id,
+        branchId: branch.id,
+        roleId: memberRole.id,
+        memberId: member.id,
+        firstName,
+        lastName,
+        email: email.toLowerCase(),
+        phone,
+        password,
+        role: ROLES.MEMBER,
+        status: 'inactive', // Inactive until approved
+        isEmailVerified: false,
+        mustChangePassword: false,
+      }, { transaction: t });
+
+      await t.commit();
+
+      // Send application received email
+      try {
+        // You can create a specific email template for member applications
+        await emailService.sendWelcomeEmail(member);
+      } catch (error) {
+        logger.error('Application email failed:', error);
+      }
+
+      logger.info(`New member self-registration: ${memberNumber} - ${email}`);
+      
+      return {
+        memberNumber,
+        status: 'pending',
+        message: 'Application submitted successfully'
+      };
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
+  }
+
   async register(organizationId, branchId, data, createdBy) {
     const t = await sequelize.transaction();
     try {

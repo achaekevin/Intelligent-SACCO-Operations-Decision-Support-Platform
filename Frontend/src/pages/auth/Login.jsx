@@ -236,6 +236,14 @@ const Login = () => {
                 Register your SACCO
               </Link>
             </p>
+
+            {/* Member Join Link */}
+            <p className="text-center text-slate-400 text-sm mt-3">
+              Want to join as a member?{' '}
+              <Link to="/join-member" className="text-gold-400 hover:text-gold-300 font-medium transition">
+                Apply for Membership
+              </Link>
+            </p>
           </div>
         </div>
       </div>

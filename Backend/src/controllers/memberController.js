@@ -3,6 +3,16 @@ import { successResponse, createdResponse, paginatedResponse } from '../utils/re
 import path from 'path';
 
 class MemberController {
+  async selfRegister(req, res, next) {
+    try {
+      const member = await memberService.selfRegister(req.body);
+      return createdResponse(res, { 
+        message: 'Application submitted successfully. You will receive an email once approved.', 
+        data: member 
+      });
+    } catch (err) { next(err); }
+  }
+
   async register(req, res, next) {
     try {
       const { branchId, ...data } = req.body;

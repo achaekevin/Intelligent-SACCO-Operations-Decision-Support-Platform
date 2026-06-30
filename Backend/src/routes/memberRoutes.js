@@ -47,6 +47,31 @@ const staffRoles = [ROLES.SACCO_ADMIN, ROLES.LOAN_OFFICER, ROLES.CASHIER];
 
 /**
  * @swagger
+ * /members/self-register:
+ *   post:
+ *     summary: Member self-registration (Public endpoint)
+ *     tags: [Members]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [firstName, lastName, email, phone, nationalId, dateOfBirth, address, password]
+ *             properties:
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               email: { type: string }
+ *               phone: { type: string }
+ *               nationalId: { type: string }
+ *               dateOfBirth: { type: string, format: date }
+ *               address: { type: string }
+ *               password: { type: string }
+ */
+router.post('/self-register', memberController.selfRegister);
+
+/**
+ * @swagger
  * /members:
  *   get:
  *     summary: List members with pagination, search, and filters
