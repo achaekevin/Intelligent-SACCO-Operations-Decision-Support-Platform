@@ -62,13 +62,24 @@ const RegisterMember = () => {
   }
 
   const onSubmit = async (data) => {
+    let loadingToast
     try {
       const token = localStorage.getItem('accessToken')
       
+      if (!token) {
+        toast.error('You must be logged in to register a member')
+        return
+      }
+      
+      console.log('Starting member registration...')
+      console.log('Form data:', data)
+      
       // Show loading toast
-      const loadingToast = toast.loading('Registering member...')
+      loadingToast = toast.loading('Registering member...')
       
       // 1. Register the member
+      console.log('Sending request to:', `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members`)
+      
       const memberRes = await axios.post(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members`,
         {
@@ -85,6 +96,8 @@ const RegisterMember = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
+
+      console.log('Member registration response:', memberRes.data)
 
       const memberId = memberRes.data.data.id
       const memberNumber = memberRes.data.data.memberNumber
@@ -167,11 +180,17 @@ const RegisterMember = () => {
       
     } catch (error) {
       console.error('Registration error:', error)
-      toast.error(error.response?.data?.message || 'Failed to register member')
-    }
-  }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to register member')
+      console.error('Error response:', error.response)
+      console.error('Error data:', error.response?.data)
+      
+      // Dismiss the loading toast if it exists
+      if (loadingToast) {
+        toast.error(error.response?.data?.message || 'Failed to register member', {
+          id: loadingToast
+        })
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to register member')
+      }
     }
   }
 
