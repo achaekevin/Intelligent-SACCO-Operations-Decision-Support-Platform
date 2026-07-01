@@ -85,6 +85,92 @@ class EmailService {
     });
   }
 
+  async sendMemberRegistrationEmail(member, organizationName) {
+    return this.send({
+      to: member.email,
+      subject: `Welcome to ${organizationName} - Registration Successful`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f9fafb">
+          <div style="background:#fff;padding:30px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+            <div style="text-align:center;margin-bottom:20px">
+              <h1 style="color:#0B4F4A;margin:0">Welcome to ${organizationName}!</h1>
+            </div>
+            <p style="font-size:16px;color:#374151">Dear ${member.firstName} ${member.lastName},</p>
+            <p style="font-size:16px;color:#374151;line-height:1.6">
+              Congratulations! You have been successfully registered as a member of <strong>${organizationName}</strong>.
+            </p>
+            <div style="background:#f0fdfa;padding:20px;border-radius:6px;margin:20px 0;border-left:4px solid #0B4F4A">
+              <p style="margin:0;font-size:14px;color:#374151"><strong>Member Number:</strong> ${member.memberNumber}</p>
+              <p style="margin:8px 0 0 0;font-size:14px;color:#374151"><strong>Registration Date:</strong> ${new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+            <p style="font-size:16px;color:#374151;line-height:1.6">
+              Your login credentials will be sent to you in a separate email shortly.
+            </p>
+            <p style="font-size:16px;color:#374151;line-height:1.6">
+              We look forward to serving you!
+            </p>
+            <hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0">
+            <p style="font-size:14px;color:#6b7280;text-align:center;margin:0">
+              ${organizationName}<br>
+              Empowering Community Finance
+            </p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  async sendMemberLoginCredentials(member, loginEmail, tempPassword, organizationName) {
+    return this.send({
+      to: member.email,
+      subject: `${organizationName} - Your Login Credentials`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f9fafb">
+          <div style="background:#fff;padding:30px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+            <div style="text-align:center;margin-bottom:20px">
+              <h1 style="color:#0B4F4A;margin:0">Your Login Credentials</h1>
+            </div>
+            <p style="font-size:16px;color:#374151">Dear ${member.firstName} ${member.lastName},</p>
+            <p style="font-size:16px;color:#374151;line-height:1.6">
+              Below are your login credentials to access the ${organizationName} member portal:
+            </p>
+            <div style="background:#fef3c7;padding:20px;border-radius:6px;margin:20px 0;border-left:4px solid #D9A441">
+              <p style="margin:0;font-size:16px;color:#374151"><strong>Login URL:</strong></p>
+              <p style="margin:8px 0;font-size:16px">
+                <a href="${process.env.FRONTEND_URL}/login" style="color:#0B4F4A;text-decoration:none;font-weight:600">${process.env.FRONTEND_URL}/login</a>
+              </p>
+              <p style="margin:16px 0 0 0;font-size:16px;color:#374151"><strong>Username (Email):</strong></p>
+              <p style="margin:4px 0;font-size:16px;color:#374151;font-family:monospace;background:#fff;padding:8px;border-radius:4px">${loginEmail}</p>
+              <p style="margin:16px 0 0 0;font-size:16px;color:#374151"><strong>Temporary Password:</strong></p>
+              <p style="margin:4px 0;font-size:18px;color:#dc2626;font-family:monospace;background:#fff;padding:8px;border-radius:4px;font-weight:bold">${tempPassword}</p>
+            </div>
+            <div style="background:#fef2f2;padding:15px;border-radius:6px;margin:20px 0;border-left:4px solid #dc2626">
+              <p style="margin:0;font-size:14px;color:#991b1b;font-weight:600">🔒 Important Security Notice:</p>
+              <p style="margin:8px 0 0 0;font-size:14px;color:#991b1b">
+                • You will be required to change this password on your first login<br>
+                • Do not share your password with anyone<br>
+                • Keep this email secure and delete it after changing your password
+              </p>
+            </div>
+            <div style="text-align:center;margin:30px 0">
+              <a href="${process.env.FRONTEND_URL}/login" style="display:inline-block;padding:14px 32px;background:#0B4F4A;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:16px">
+                Login to Portal
+              </a>
+            </div>
+            <p style="font-size:14px;color:#6b7280;line-height:1.6">
+              If you have any questions or need assistance, please contact our support team.
+            </p>
+            <hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0">
+            <p style="font-size:14px;color:#6b7280;text-align:center;margin:0">
+              ${organizationName}<br>
+              Empowering Community Finance
+            </p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
   async sendTransactionNotification(member, transaction) {
     if (!member.email) return;
     return this.send({

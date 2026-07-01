@@ -157,6 +157,7 @@ class MemberService {
       }, { transaction: t });
 
       // 2. Create user account for login if email is provided
+      let tempPassword = null;
       if (data.email) {
         // Find Member role
         const [memberRole] = await Role.findOrCreate({
@@ -170,8 +171,8 @@ class MemberService {
           transaction: t
         });
 
-        // Generate temporary password
-        const tempPassword = `${data.firstName}@${Math.random().toString(36).slice(-4)}`;
+        // Generate temporary password (format: FirstName@1234)
+        tempPassword = `${data.firstName}@${Math.floor(1000 + Math.random() * 9000)}`;
 
         // Create user account (inactive until member is activated)
         await User.create({
@@ -189,9 +190,6 @@ class MemberService {
           isEmailVerified: false,
           mustChangePassword: true,
         }, { transaction: t });
-
-        // Store temp password for email (will be sent when member is activated)
-        member.tempPassword = tempPassword;
       }
 
       // 3. Auto-create ordinary savings account
@@ -219,6 +217,35 @@ class MemberService {
       }, { transaction: t });
 
       await t.commit();
+
+      // 5. Send welcome emails (don't wait for them)
+      if (member.email && tempPassword) {
+        // Get organization name
+        const organization = await Organization.findByPk(organizationId);
+        const orgName = organization?.name || process.env.APP_NAME;
+
+        // Send registration confirmation email (Email #1)
+        emailService.sendMemberRegistrationEmail({
+          firstName: member.firstName,
+          lastName: member.lastName,
+          email: member.email,
+          memberNumber: member.memberNumber,
+        }, orgName).catch((e) =>
+          logger.error('Registration email failed:', e.message)
+        );
+
+        // Send login credentials email 2 seconds later (Email #2)
+        setTimeout(() => {
+          emailService.sendMemberLoginCredentials({
+            firstName: member.firstName,
+            lastName: member.lastName,
+            email: member.email,
+            memberNumber: member.memberNumber,
+          }, data.email.toLowerCase(), tempPassword, orgName).catch((e) =>
+            logger.error('Login credentials email failed:', e.message)
+          );
+        }, 2000);
+      }
 
       logger.info(`New member registered: ${memberNumber} in org ${organizationId}`);
       return this.getById(member.id, organizationId);
