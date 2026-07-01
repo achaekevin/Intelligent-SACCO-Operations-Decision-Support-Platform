@@ -4,6 +4,7 @@ import uiReducer from './slices/uiSlice'
 import membersReducer from './slices/membersSlice'
 import loansReducer from './slices/loansSlice'
 import notificationsReducer from './slices/notificationsSlice'
+import branchesReducer from './slices/branchesSlice'
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     members: membersReducer,
     loans: loansReducer,
     notifications: notificationsReducer,
+    branches: branchesReducer,
   },
 })
