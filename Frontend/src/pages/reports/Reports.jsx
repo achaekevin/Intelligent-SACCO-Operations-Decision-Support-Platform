@@ -9,7 +9,7 @@ import Button from '../../components/common/Button'
 import { toast } from 'react-hot-toast'
 import api from '../../services/api'
 
-const ReportsHub = () => {
+const Reports = () => {
   const [loading, setLoading] = useState({})
   const [filters, setFilters] = useState({
     startDate: '',
@@ -351,4 +351,4 @@ const ReportsHub = () => {
   )
 }
 
-export default ReportsHub
+export default Reports

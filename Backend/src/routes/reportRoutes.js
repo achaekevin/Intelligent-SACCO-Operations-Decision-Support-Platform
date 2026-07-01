@@ -33,16 +33,9 @@ router.get('/', reportController.list);
 router.get('/members',  auditLog('export', 'report'), reportController.membersReport);
 router.get('/savings',  auditLog('export', 'report'), reportController.savingsReport);
 router.get('/loans',    auditLog('export', 'report'), reportController.loansReport);
-router.get('/financial', async (req, res, next) => {
-  try {
-    const accountingService = (await import('../services/accountingService.js')).default;
-    const [trialBalance, incomeStatement] = await Promise.all([
-      accountingService.getTrialBalance(req.user.organizationId),
-      accountingService.getIncomeStatement(req.user.organizationId),
-    ]);
-    const { successResponse } = await import('../utils/response.js');
-    return successResponse(res, { data: { trialBalance, incomeStatement }, message: 'Financial report generated.' });
-  } catch (err) { next(err); }
-});
+router.get('/transactions', auditLog('export', 'report'), reportController.transactionsReport);
+router.get('/statement/:memberId', auditLog('export', 'report'), reportController.memberStatement);
+router.get('/statement', auditLog('export', 'report'), reportController.memberStatement); // For current user
+router.get('/financial', auditLog('export', 'report'), reportController.financialReport);
 
 export default router;

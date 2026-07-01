@@ -74,15 +74,57 @@ class ReportsController {
     } catch (err) { next(err); }
   }
 
+  async memberStatement(req, res, next) {
+    try {
+      const { format = 'json' } = req.query;
+      const memberId = req.params.memberId || req.user.memberId;
+      
+      if (format === 'pdf') {
+        const buffer = await reportService.memberStatementPDF(memberId, req.user.organizationId, req.query);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="member-statement-${Date.now()}.pdf"`);
+        return res.send(buffer);
+      }
+      
+      const data = await reportService.getMemberStatement(memberId, req.user.organizationId, req.query);
+      return successResponse(res, { data, message: 'Member statement generated.' });
+    } catch (err) { next(err); }
+  }
+
+  async transactionsReport(req, res, next) {
+    try {
+      const { format = 'json' } = req.query;
+      
+      if (format === 'csv') {
+        const csv = await reportService.transactionsCSV(req.user.organizationId, req.query);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="transactions-report-${Date.now()}.csv"`);
+        return res.send(csv);
+      }
+      
+      const data = await reportService.getTransactionsData(req.user.organizationId, req.query);
+      return successResponse(res, { data, message: 'Transactions report generated.' });
+    } catch (err) { next(err); }
+  }
+
+  async financialReport(req, res, next) {
+    try {
+      const data = await reportService.getFinancialReport(req.user.organizationId, req.query);
+      return successResponse(res, { data, message: 'Financial report generated.' });
+    } catch (err) { next(err); }
+  }
+
   async list(req, res, next) {
     try {
       return successResponse(res, {
         message: 'Available reports',
         data: [
-          { name: 'Members Report',  endpoint: '/api/v1/reports/members',  formats: ['json', 'csv', 'excel', 'pdf'] },
-          { name: 'Savings Report',  endpoint: '/api/v1/reports/savings',  formats: ['json', 'csv', 'excel'] },
-          { name: 'Loans Report',    endpoint: '/api/v1/reports/loans',    formats: ['json', 'csv', 'excel', 'pdf'] },
-          { name: 'Financial Report',endpoint: '/api/v1/reports/financial',formats: ['json'] },
+          { name: 'Members Report',      endpoint: '/api/v1/reports/members',      formats: ['json', 'csv', 'excel', 'pdf'] },
+          { name: 'Savings Report',      endpoint: '/api/v1/reports/savings',      formats: ['json', 'csv', 'excel'] },
+          { name: 'Loans Report',        endpoint: '/api/v1/reports/loans',        formats: ['json', 'csv', 'excel', 'pdf'] },
+          { name: 'Member Statement',    endpoint: '/api/v1/reports/statement/:memberId', formats: ['json', 'pdf'] },
+          { name: 'Transactions Report', endpoint: '/api/v1/reports/transactions', formats: ['json', 'csv'] },
+          { name: 'Financial Report',    endpoint: '/api/v1/reports/financial',    formats: ['json'] },
         ],
       });
     } catch (err) { next(err); }
