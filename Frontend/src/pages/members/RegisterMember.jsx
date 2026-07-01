@@ -8,18 +8,18 @@ import { Camera } from 'lucide-react'
 import PageHeader from '../../components/common/PageHeader'
 import { FormField, TextInput, SelectInput } from '../../components/forms/FormField'
 import Button from '../../components/common/Button'
-import { addMember } from '../../redux/slices/membersSlice'
+import { fetchMembers } from '../../redux/slices/membersSlice'
 import { BRANCHES } from '../../utils/mockData'
+import axios from 'axios'
 
 const schema = yup.object({
-  name: yup.string().required('Full name is required'),
+  firstName: yup.string().required('First name is required'),
+  lastName: yup.string().required('Last name is required'),
   email: yup.string().email('Enter a valid email').required('Email is required'),
   phone: yup.string().required('Phone number is required'),
-  idNumber: yup.string().required('ID number is required'),
-  branch: yup.string().required('Branch is required'),
-  joinDate: yup.string().required('Join date is required'),
-  nextOfKin: yup.string().required('Next of kin is required'),
-  beneficiary: yup.string().required('Beneficiary is required'),
+  nationalId: yup.string().required('National ID is required'),
+  dateOfBirth: yup.string().required('Date of birth is required'),
+  address: yup.string().required('Address is required'),
 })
 
 const RegisterMember = () => {
@@ -27,23 +27,23 @@ const RegisterMember = () => {
   const dispatch = useDispatch()
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: { joinDate: new Date().toISOString().slice(0, 10) },
   })
 
   const onSubmit = async (data) => {
-    await new Promise((r) => setTimeout(r, 700))
-    dispatch(addMember({
-      id: `MB-${Date.now()}`,
-      memberNo: `AM${Math.floor(20000 + Math.random() * 9999)}`,
-      status: 'Pending',
-      savings: 0,
-      shareCapital: 0,
-      activeLoans: 0,
-      avatar: null,
-      ...data,
-    }))
-    toast.success('Member registered successfully')
-    navigate('/members')
+    try {
+      const token = localStorage.getItem('accessToken')
+      await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members`,
+        data,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      toast.success('Member registered successfully!')
+      // Refresh member list
+      dispatch(fetchMembers())
+      navigate('/members')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to register member')
+    }
   }
 
   return (
@@ -62,11 +62,11 @@ const RegisterMember = () => {
 
         <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3">Personal Details</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-          <FormField label="Full name" error={errors.name} required>
-            <TextInput register={register} name="name" placeholder="e.g. Mary Wanjiru" error={errors.name} />
+          <FormField label="First name" error={errors.firstName} required>
+            <TextInput register={register} name="firstName" placeholder="e.g. Mary" error={errors.firstName} />
           </FormField>
-          <FormField label="National ID number" error={errors.idNumber} required>
-            <TextInput register={register} name="idNumber" placeholder="e.g. 30123456" error={errors.idNumber} />
+          <FormField label="Last name" error={errors.lastName} required>
+            <TextInput register={register} name="lastName" placeholder="e.g. Wanjiru" error={errors.lastName} />
           </FormField>
           <FormField label="Email address" error={errors.email} required>
             <TextInput register={register} name="email" type="email" placeholder="member@email.com" error={errors.email} />
@@ -74,25 +74,24 @@ const RegisterMember = () => {
           <FormField label="Phone number" error={errors.phone} required>
             <TextInput register={register} name="phone" placeholder="+254 7XX XXX XXX" error={errors.phone} />
           </FormField>
-        </div>
-
-        <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3 mt-2">Membership Details</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-          <FormField label="Branch" error={errors.branch} required>
-            <SelectInput register={register} name="branch" error={errors.branch} options={BRANCHES.map((b) => b.name)} placeholder="Select branch" />
+          <FormField label="National ID number" error={errors.nationalId} required>
+            <TextInput register={register} name="nationalId" placeholder="e.g. 30123456" error={errors.nationalId} />
           </FormField>
-          <FormField label="Join date" error={errors.joinDate} required>
-            <TextInput register={register} name="joinDate" type="date" error={errors.joinDate} />
+          <FormField label="Date of Birth" error={errors.dateOfBirth} required>
+            <TextInput register={register} name="dateOfBirth" type="date" error={errors.dateOfBirth} />
           </FormField>
         </div>
 
-        <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3 mt-2">Next of Kin &amp; Beneficiary</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-          <FormField label="Next of kin full name" error={errors.nextOfKin} required>
-            <TextInput register={register} name="nextOfKin" placeholder="Full name" error={errors.nextOfKin} />
-          </FormField>
-          <FormField label="Beneficiary full name" error={errors.beneficiary} required>
-            <TextInput register={register} name="beneficiary" placeholder="Full name" error={errors.beneficiary} />
+        <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3 mt-2">Address</h3>
+        <div className="grid grid-cols-1 gap-x-4">
+          <FormField label="Physical address" error={errors.address} required>
+            <textarea
+              {...register('address')}
+              rows="3"
+              placeholder="Enter physical address"
+              className="w-full bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-600 rounded-lg px-3 py-2 text-sm text-ink-800 dark:text-ink-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+            {errors.address && <p className="text-xs text-danger mt-1">{errors.address.message}</p>}
           </FormField>
         </div>
 

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { UserPlus, CheckCircle, XCircle } from 'lucide-react'
 import { toast } from 'react-toastify'
 import PageHeader from '../../components/common/PageHeader'
@@ -8,12 +8,19 @@ import DataTable from '../../components/tables/DataTable'
 import Badge from '../../components/common/Badge'
 import Button from '../../components/common/Button'
 import { formatKES, initials } from '../../utils/format'
+import { fetchMembers } from '../../redux/slices/membersSlice'
 import axios from 'axios'
 
 const MemberList = () => {
   const navigate = useNavigate()
-  const { list } = useSelector((s) => s.members)
+  const dispatch = useDispatch()
+  const { list, loading: loadingMembers } = useSelector((s) => s.members)
   const [loading, setLoading] = useState(null)
+
+  // Fetch members on component mount
+  useEffect(() => {
+    dispatch(fetchMembers())
+  }, [dispatch])
 
   const handleActivate = async (memberId) => {
     if (!confirm('Are you sure you want to activate this member? This will enable their login and send them an email.')) return
@@ -26,8 +33,8 @@ const MemberList = () => {
         { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } }
       )
       toast.success('Member activated successfully! Email sent to member.')
-      // Reload the page to refresh member list
-      window.location.reload()
+      // Reload members list
+      dispatch(fetchMembers())
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to activate member')
     } finally {
@@ -47,7 +54,7 @@ const MemberList = () => {
         { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } }
       )
       toast.success('Member suspended successfully!')
-      window.location.reload()
+      dispatch(fetchMembers())
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to suspend member')
     } finally {
@@ -59,23 +66,41 @@ const MemberList = () => {
     {
       key: 'name',
       label: 'Member',
-      render: (r) => (
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
-            {initials(r.name)}
+      render: (r) => {
+        const fullName = `${r.firstName || ''} ${r.lastName || ''}`.trim() || r.name || 'N/A'
+        return (
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
+              {initials(fullName)}
+            </div>
+            <div>
+              <p className="font-medium text-ink-800 dark:text-ink-50 leading-tight">{fullName}</p>
+              <p className="text-xs text-ink-400 leading-tight">{r.memberNumber || r.memberNo || 'N/A'}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium text-ink-800 dark:text-ink-50 leading-tight">{r.name}</p>
-            <p className="text-xs text-ink-400 leading-tight">{r.memberNo}</p>
-          </div>
-        </div>
-      ),
+        )
+      },
     },
-    { key: 'branch', label: 'Branch' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'savings', label: 'Savings', render: (r) => formatKES(r.savings) },
-    { key: 'activeLoans', label: 'Active Loans' },
-    { key: 'status', label: 'Status', render: (r) => <Badge>{r.status}</Badge> },
+    { 
+      key: 'branch', 
+      label: 'Branch',
+      render: (r) => r.branch?.name || r.branch || 'N/A'
+    },
+    { 
+      key: 'phone', 
+      label: 'Phone',
+      render: (r) => r.phone || 'N/A'
+    },
+    { 
+      key: 'email', 
+      label: 'Email',
+      render: (r) => r.email || 'N/A'
+    },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      render: (r) => <Badge>{r.status || 'unknown'}</Badge> 
+    },
     {
       key: 'actions',
       label: 'Actions',
@@ -114,6 +139,17 @@ const MemberList = () => {
       ),
     },
   ]
+
+  if (loadingMembers) {
+    return (
+      <div>
+        <PageHeader title="Members" subtitle="Loading members..." />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
