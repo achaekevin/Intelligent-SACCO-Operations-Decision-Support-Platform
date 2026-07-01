@@ -23,13 +23,29 @@ const Profile = () => {
   const dispatch = useDispatch()
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: { name: user?.name, email: user?.email, phone: user?.phone || '' },
+    defaultValues: { 
+      name: user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim(), 
+      email: user?.email, 
+      phone: user?.phone || '' 
+    },
   })
 
   const onSubmit = async (data) => {
-    await new Promise((r) => setTimeout(r, 600))
-    dispatch(updateProfile(data))
-    toast.success('Profile updated successfully')
+    try {
+      // Split name into firstName and lastName
+      const nameParts = data.name.trim().split(' ')
+      const firstName = nameParts[0] || ''
+      const lastName = nameParts.slice(1).join(' ') || ''
+      
+      await dispatch(updateProfile({
+        firstName,
+        lastName,
+        phone: data.phone,
+      }))
+      toast.success('Profile updated successfully')
+    } catch (error) {
+      toast.error(error.message || 'Failed to update profile')
+    }
   }
 
   return (

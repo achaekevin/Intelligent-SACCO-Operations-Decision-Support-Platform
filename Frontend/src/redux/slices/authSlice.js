@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { MOCK_USERS } from '../../utils/mockData'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
 
 const storedUser = (() => {
   try {
@@ -12,8 +14,8 @@ const storedUser = (() => {
 
 const initialState = {
   user: storedUser,
-  token: storedUser ? 'mock-jwt-token' : null,
-  isAuthenticated: !!storedUser,
+  token: localStorage.getItem('accessToken') || null,
+  isAuthenticated: !!storedUser && !!localStorage.getItem('accessToken'),
   loading: false,
   error: null,
   rememberMe: !!storedUser,
@@ -35,6 +37,7 @@ const authSlice = createSlice({
       state.rememberMe = action.payload.rememberMe
       const storage = action.payload.rememberMe ? localStorage : sessionStorage
       storage.setItem('sacco_user', JSON.stringify(action.payload.user))
+      localStorage.setItem('accessToken', action.payload.token)
     },
     loginFailure(state, action) {
       state.loading = false
@@ -45,9 +48,10 @@ const authSlice = createSlice({
       state.token = null
       state.isAuthenticated = false
       localStorage.removeItem('sacco_user')
+      localStorage.removeItem('accessToken')
       sessionStorage.removeItem('sacco_user')
     },
-    updateProfile(state, action) {
+    updateProfileState(state, action) {
       state.user = { ...state.user, ...action.payload }
       if (localStorage.getItem('sacco_user')) {
         localStorage.setItem('sacco_user', JSON.stringify(state.user))
@@ -56,24 +60,47 @@ const authSlice = createSlice({
   },
 })
 
-export const { loginStart, loginSuccess, loginFailure, logout, updateProfile } = authSlice.actions
+export const { loginStart, loginSuccess, loginFailure, logout, updateProfileState } = authSlice.actions
 
-// Thunk-like async action using mock data (no real API)
-export const loginUser = ({ email, password, rememberMe }) => (dispatch) => {
+// Real API login
+export const loginUser = ({ email, password, rememberMe }) => async (dispatch) => {
   dispatch(loginStart())
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const user = MOCK_USERS.find((u) => u.email === email && u.password === password)
-      if (user) {
-        const { password: _pw, ...safeUser } = user
-        dispatch(loginSuccess({ user: safeUser, token: 'mock-jwt-token', rememberMe }))
-        resolve(safeUser)
-      } else {
-        dispatch(loginFailure('Invalid email or password'))
-        reject(new Error('Invalid email or password'))
-      }
-    }, 600)
-  })
+  try {
+    const response = await axios.post(`${API_URL}/auth/login`, { email, password })
+    const { user, accessToken } = response.data.data
+    
+    dispatch(loginSuccess({ 
+      user, 
+      token: accessToken, 
+      rememberMe 
+    }))
+    return user
+  } catch (error) {
+    const message = error.response?.data?.message || 'Login failed'
+    dispatch(loginFailure(message))
+    throw new Error(message)
+  }
+}
+
+// Real API profile update
+export const updateProfile = (profileData) => async (dispatch, getState) => {
+  try {
+    const token = getState().auth.token || localStorage.getItem('accessToken')
+    const userId = getState().auth.user?.id
+    
+    // Call backend API to update profile
+    const response = await axios.put(
+      `${API_URL}/users/${userId}`,
+      profileData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    
+    // Update Redux state with new data
+    dispatch(updateProfileState(response.data.data))
+    return response.data.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to update profile')
+  }
 }
 
 export default authSlice.reducer
