@@ -21,7 +21,7 @@ class DashboardService {
     // Total Savings (all active savings accounts)
     const [[savingsResult]] = await sequelize.query(
       `SELECT SUM(balance) as total FROM savings_accounts 
-       WHERE organizationId = ? AND status = 'active' AND deletedAt IS NULL`,
+       WHERE organizationId = ? AND status = 'active'`,
       { replacements: [organizationId] }
     );
     const totalSavings = parseFloat(savingsResult?.total || 0);
@@ -39,7 +39,7 @@ class DashboardService {
     // Outstanding Loan Principal
     const [[loanResult]] = await sequelize.query(
       `SELECT SUM(principalBalance) as total FROM loans 
-       WHERE organizationId = ? AND status = 'disbursed' AND deletedAt IS NULL`,
+       WHERE organizationId = ? AND status = 'disbursed'`,
       { replacements: [organizationId] }
     );
     const outstandingLoans = parseFloat(loanResult?.total || 0);
@@ -66,7 +66,7 @@ class DashboardService {
     const [[interestResult]] = await sequelize.query(
       `SELECT SUM(interestPaid) as total FROM loan_repayments 
        WHERE organizationId = ? AND status IN ('paid', 'partial') 
-       AND paymentDate >= ? AND deletedAt IS NULL`,
+       AND paymentDate >= ?`,
       { replacements: [organizationId, startOfMonth] }
     );
     const interestIncome = parseFloat(interestResult?.total || 0);
@@ -74,7 +74,7 @@ class DashboardService {
     const [[feesResult]] = await sequelize.query(
       `SELECT SUM(processingFee + insuranceFee) as total FROM loans 
        WHERE organizationId = ? AND status IN ('disbursed', 'completed') 
-       AND disbursedAt >= ? AND deletedAt IS NULL`,
+       AND disbursedAt >= ?`,
       { replacements: [organizationId, startOfMonth] }
     );
     const feeIncome = parseFloat(feesResult?.total || 0);
@@ -85,7 +85,7 @@ class DashboardService {
     const [[ytdInterestResult]] = await sequelize.query(
       `SELECT SUM(interestPaid) as total FROM loan_repayments 
        WHERE organizationId = ? AND status IN ('paid', 'partial') 
-       AND paymentDate >= ? AND deletedAt IS NULL`,
+       AND paymentDate >= ?`,
       { replacements: [organizationId, startOfYear] }
     );
     const ytdInterest = parseFloat(ytdInterestResult?.total || 0);
@@ -93,7 +93,7 @@ class DashboardService {
     const [[ytdFeesResult]] = await sequelize.query(
       `SELECT SUM(processingFee + insuranceFee) as total FROM loans 
        WHERE organizationId = ? AND status IN ('disbursed', 'completed') 
-       AND disbursedAt >= ? AND deletedAt IS NULL`,
+       AND disbursedAt >= ?`,
       { replacements: [organizationId, startOfYear] }
     );
     const ytdFees = parseFloat(ytdFeesResult?.total || 0);
@@ -215,7 +215,7 @@ class DashboardService {
     // Total Loan Balance
     const [[loanBalanceResult]] = await sequelize.query(
       `SELECT SUM(principalBalance) as total FROM loans 
-       WHERE organizationId = ? AND memberId = ? AND status = 'disbursed' AND deletedAt IS NULL`,
+       WHERE organizationId = ? AND memberId = ? AND status = 'disbursed'`,
       { replacements: [organizationId, member.id] }
     );
     const totalLoanBalance = parseFloat(loanBalanceResult?.total || 0);
@@ -279,14 +279,14 @@ class DashboardService {
       const [[ordinaryResult]] = await sequelize.query(
         `SELECT SUM(balance) as total FROM savings_accounts 
          WHERE organizationId = ? AND accountType = 'ordinary' 
-         AND status = 'active' AND createdAt < ? AND deletedAt IS NULL`,
+         AND status = 'active' AND createdAt < ?`,
         { replacements: [organizationId, nextDate] }
       );
 
       const [[shareResult]] = await sequelize.query(
         `SELECT SUM(balance) as total FROM savings_accounts 
          WHERE organizationId = ? AND accountType = 'share_capital' 
-         AND status = 'active' AND createdAt < ? AND deletedAt IS NULL`,
+         AND status = 'active' AND createdAt < ?`,
         { replacements: [organizationId, nextDate] }
       );
 

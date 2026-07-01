@@ -26,7 +26,7 @@ class EmailService {
       logger.info(`Email sent to ${to}: ${info.messageId}`);
       return info;
     } catch (err) {
-      logger.error(`Email send failed to ${to}:`, err.message);
+      logger.error(`Email send failed to ${to}:`, err.message, err.code, err.command);
       throw err;
     }
   }
