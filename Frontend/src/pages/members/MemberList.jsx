@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { UserPlus, CheckCircle, XCircle } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { UserPlus, CheckCircle, XCircle, Search, Filter } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import PageHeader from '../../components/common/PageHeader'
 import DataTable from '../../components/tables/DataTable'
 import Badge from '../../components/common/Badge'
@@ -16,6 +16,9 @@ const MemberList = () => {
   const dispatch = useDispatch()
   const { list, loading: loadingMembers } = useSelector((s) => s.members)
   const [loading, setLoading] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
 
   // Fetch members on component mount
   useEffect(() => {
@@ -33,7 +36,6 @@ const MemberList = () => {
         { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } }
       )
       toast.success('Member activated successfully! Email sent to member.')
-      // Reload members list
       dispatch(fetchMembers())
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to activate member')
@@ -61,6 +63,25 @@ const MemberList = () => {
       setLoading(null)
     }
   }
+
+  // Filter members based on search and status
+  const filteredMembers = list.filter(member => {
+    const fullName = `${member.firstName || ''} ${member.lastName || ''}`.toLowerCase()
+    const memberNumber = (member.memberNumber || member.memberNo || '').toLowerCase()
+    const email = (member.email || '').toLowerCase()
+    const phone = (member.phone || '').toLowerCase()
+    const search = searchTerm.toLowerCase()
+
+    const matchesSearch = !searchTerm || 
+      fullName.includes(search) ||
+      memberNumber.includes(search) ||
+      email.includes(search) ||
+      phone.includes(search)
+
+    const matchesStatus = !statusFilter || member.status === statusFilter
+
+    return matchesSearch && matchesStatus
+  })
 
   const columns = [
     {
@@ -155,10 +176,87 @@ const MemberList = () => {
     <div>
       <PageHeader
         title="Members"
-        subtitle={`${list.length} registered members across all branches`}
+        subtitle={`${filteredMembers.length} of ${list.length} members ${statusFilter || searchTerm ? 'match filters' : 'registered'}`}
         actions={<Button icon={UserPlus} onClick={() => navigate('/members/register')}>Register Member</Button>}
       />
-      <DataTable columns={columns} data={list} title="members" />
+
+      {/* Search and Filters */}
+      <div className="mb-4 bg-white dark:bg-ink-800 rounded-lg p-4 shadow-card border border-ink-50 dark:border-ink-700">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search Input */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search by name, member number, email, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          {/* Filter Button */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
+              showFilters 
+                ? 'bg-teal-50 border-teal-500 text-teal-700 dark:bg-teal-900 dark:border-teal-600 dark:text-teal-300' 
+                : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+          >
+            <Filter size={18} />
+            <span className="font-medium">Filters</span>
+            {statusFilter && <span className="bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full">1</span>}
+          </button>
+        </div>
+
+        {/* Filter Options */}
+        {showFilters && (
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setSearchTerm('')
+                    setStatusFilter('')
+                  }}
+                  className="text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 font-medium"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Results */}
+      {filteredMembers.length === 0 ? (
+        <div className="text-center py-12 bg-white dark:bg-ink-800 rounded-lg">
+          <p className="text-gray-500 dark:text-gray-400">
+            {searchTerm || statusFilter ? 'No members match your filters' : 'No members registered yet'}
+          </p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={filteredMembers} title="members" />
+      )}
     </div>
   )
 }
