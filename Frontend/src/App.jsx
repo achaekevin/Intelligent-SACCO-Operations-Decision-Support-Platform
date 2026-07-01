@@ -13,6 +13,7 @@ import Register from './pages/auth/Register'
 import MemberRegister from './pages/auth/MemberRegister'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword'
+import VerifyEmail from './pages/auth/VerifyEmail'
 import ChangePassword from './pages/auth/ChangePassword'
 
 // Dashboard
@@ -96,6 +97,7 @@ function App() {
         <Route path="/join-member" element={<MemberRegister />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
       </Route>
 
       {/* Staff dashboard */}
