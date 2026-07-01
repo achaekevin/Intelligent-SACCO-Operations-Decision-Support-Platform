@@ -33,6 +33,7 @@ import BranchDetails from './pages/branches/BranchDetails'
 
 // Savings
 import SavingsAccounts from './pages/savings/SavingsAccounts'
+import AccountDetails from './pages/savings/AccountDetails'
 import Deposits from './pages/savings/Deposits'
 import Withdrawals from './pages/savings/Withdrawals'
 import FixedDeposits from './pages/savings/FixedDeposits'
@@ -121,6 +122,7 @@ function App() {
         <Route path="/branches/:id/edit" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.branches}><EditBranch /></ProtectedRoute>} />
 
         <Route path="/savings" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.savings}><SavingsAccounts /></ProtectedRoute>} />
+        <Route path="/savings/accounts/:id" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.savings}><AccountDetails /></ProtectedRoute>} />
         <Route path="/savings/deposits" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.savings}><Deposits /></ProtectedRoute>} />
         <Route path="/savings/withdrawals" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.savings}><Withdrawals /></ProtectedRoute>} />
         <Route path="/savings/fixed-deposits" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.savings}><FixedDeposits /></ProtectedRoute>} />
