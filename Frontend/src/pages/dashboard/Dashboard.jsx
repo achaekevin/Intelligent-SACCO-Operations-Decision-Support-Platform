@@ -38,19 +38,26 @@ const Dashboard = () => {
       const headers = { Authorization: `Bearer ${token}` }
 
       const [statsRes, txRes, savingsRes, membersRes] = await Promise.all([
-        axios.get(`${API_URL}/dashboard/admin/stats`, { headers }),
-        axios.get(`${API_URL}/dashboard/admin/transactions?limit=6`, { headers }),
-        axios.get(`${API_URL}/dashboard/charts/savings-growth?months=6`, { headers }),
-        axios.get(`${API_URL}/dashboard/charts/member-growth?months=6`, { headers }),
+        axios.get(`${API_URL}/dashboard/admin/stats`, { headers }).catch(err => {
+          console.error('Stats error:', err.response?.data || err.message)
+          return { data: { data: null } }
+        }),
+        axios.get(`${API_URL}/dashboard/admin/transactions?limit=6`, { headers }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/dashboard/charts/savings-growth?months=6`, { headers }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/dashboard/charts/member-growth?months=6`, { headers }).catch(() => ({ data: { data: [] } })),
       ])
 
       setStats(statsRes.data.data)
       setTransactions(txRes.data.data || [])
       setSavingsGrowth(savingsRes.data.data || [])
       setMemberGrowth(membersRes.data.data || [])
+      
+      if (!statsRes.data.data) {
+        toast.error('Failed to load statistics. Please check your connection.')
+      }
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
-      toast.error('Failed to load dashboard data')
+      toast.error('Failed to load dashboard data. Please refresh the page.')
     } finally {
       setLoading(false)
     }
@@ -82,13 +89,13 @@ const Dashboard = () => {
   ]
 
   return (
-    <div>
+    <div className="p-4 sm:p-6 lg:p-8">
       <PageHeader
         title={`Welcome back, ${user?.firstName || 'there'}`}
         subtitle="Here's what's happening across your SACCO today."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {loading ? (
           Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
         ) : stats ? (
@@ -189,9 +196,9 @@ const Dashboard = () => {
       </div>
 
       {!loading && savingsGrowth.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4">
           <ChartCard title="Savings Growth" subtitle="Total savings vs. share capital (KES millions)">
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={savingsGrowth}>
                 <defs>
                   <linearGradient id="savingsGrad" x1="0" y1="0" x2="0" y2="1">
@@ -200,18 +207,18 @@ const Dashboard = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7E6" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip />
+                <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ fontSize: 12 }} />
                 <Area type="monotone" dataKey="savings" name="Savings" stroke="#0B4F4A" strokeWidth={2} fill="url(#savingsGrad)" />
                 <Line type="monotone" dataKey="shareCapital" name="Share Capital" stroke="#D9A441" strokeWidth={2} dot={false} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
               </AreaChart>
             </ResponsiveContainer>
           </ChartCard>
 
           <ChartCard title="Member Growth" subtitle="Cumulative registered members">
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={memberGrowth}>
                 <defs>
                   <linearGradient id="memberGrad" x1="0" y1="0" x2="0" y2="1">
@@ -220,9 +227,9 @@ const Dashboard = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7E6" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip />
+                <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ fontSize: 12 }} />
                 <Area type="monotone" dataKey="members" stroke="#D9A441" strokeWidth={2} fill="url(#memberGrad)" />
               </AreaChart>
             </ResponsiveContainer>
@@ -231,9 +238,11 @@ const Dashboard = () => {
       )}
 
       {!loading && transactions.length > 0 && (
-        <div className="mt-4">
-          <h3 className="font-semibold text-ink-800 dark:text-ink-50 mb-3">Recent Transactions</h3>
-          <DataTable columns={txColumns} data={transactions} title="recent-transactions" pageSize={6} exportable={false} />
+        <div className="mt-4 overflow-x-auto">
+          <h3 className="font-semibold text-ink-800 dark:text-ink-50 mb-3 text-sm sm:text-base">Recent Transactions</h3>
+          <div className="min-w-full">
+            <DataTable columns={txColumns} data={transactions} title="recent-transactions" pageSize={6} exportable={false} />
+          </div>
         </div>
       )}
     </div>

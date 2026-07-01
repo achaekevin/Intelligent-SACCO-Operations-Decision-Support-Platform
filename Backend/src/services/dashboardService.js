@@ -1,4 +1,4 @@
-import { Member, SavingsAccount, Loan, Branch } from '../models/index.js';
+import { Member, SavingsAccount, Loan, Branch, User } from '../models/index.js';
 import { SavingsTransaction } from '../models/Savings.js';
 import { Op } from 'sequelize';
 import sequelize from '../config/database.js';
@@ -167,7 +167,7 @@ class DashboardService {
     const member = await Member.findOne({
       where: { organizationId },
       include: [{
-        model: require('./index.js').User,
+        model: User,
         as: 'userAccount',
         where: { id: userId }
       }]
@@ -236,7 +236,7 @@ class DashboardService {
     const member = await Member.findOne({
       where: { organizationId },
       include: [{
-        model: require('./index.js').User,
+        model: User,
         as: 'userAccount',
         where: { id: userId }
       }]
