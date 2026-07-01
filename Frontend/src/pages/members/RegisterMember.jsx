@@ -232,7 +232,25 @@ const RegisterMember = () => {
                 </SelectInput>
               </FormField>
               <FormField label="Occupation" error={errors.occupation}>
-                <TextInput register={register} name="occupation" placeholder="e.g. Teacher" error={errors.occupation} />
+                <SelectInput register={register} name="occupation" error={errors.occupation}>
+                  <option value="">Select occupation</option>
+                  <option value="Teacher">Teacher</option>
+                  <option value="Doctor">Doctor</option>
+                  <option value="Nurse">Nurse</option>
+                  <option value="Engineer">Engineer</option>
+                  <option value="Accountant">Accountant</option>
+                  <option value="Lawyer">Lawyer</option>
+                  <option value="Business Owner">Business Owner</option>
+                  <option value="Farmer">Farmer</option>
+                  <option value="Driver">Driver</option>
+                  <option value="Government Employee">Government Employee</option>
+                  <option value="Private Sector Employee">Private Sector Employee</option>
+                  <option value="Self Employed">Self Employed</option>
+                  <option value="Student">Student</option>
+                  <option value="Retired">Retired</option>
+                  <option value="Unemployed">Unemployed</option>
+                  <option value="Other">Other</option>
+                </SelectInput>
               </FormField>
               <FormField label="Employer" error={errors.employer}>
                 <TextInput register={register} name="employer" placeholder="e.g. Company Name" error={errors.employer} />
@@ -247,7 +265,7 @@ const RegisterMember = () => {
               <textarea
                 {...register('address')}
                 rows="3"
-                placeholder="Enter physical address"
+                placeholder="Enter physical address (e.g., P.O. Box 1234, Nairobi or House No. 123, Street Name, City)"
                 className="w-full bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-600 rounded-lg px-3 py-2 text-sm text-ink-800 dark:text-ink-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               {errors.address && <p className="text-xs text-danger mt-1">{errors.address.message}</p>}
