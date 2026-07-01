@@ -65,6 +65,9 @@ const RegisterMember = () => {
     try {
       const token = localStorage.getItem('accessToken')
       
+      // Show loading toast
+      const loadingToast = toast.loading('Registering member...')
+      
       // 1. Register the member
       const memberRes = await axios.post(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members`,
@@ -84,9 +87,11 @@ const RegisterMember = () => {
       )
 
       const memberId = memberRes.data.data.id
+      const memberNumber = memberRes.data.data.memberNumber
 
       // 2. Upload profile photo if provided
       if (profilePhoto) {
+        toast.loading('Uploading profile photo...', { id: loadingToast })
         const formData = new FormData()
         formData.append('document', profilePhoto)
         formData.append('documentType', 'profile_photo')
@@ -104,10 +109,12 @@ const RegisterMember = () => {
           )
         } catch (photoError) {
           console.error('Photo upload failed:', photoError)
+          toast.error('Photo upload failed, but member was registered', { id: loadingToast })
         }
       }
 
       // 3. Add next of kin
+      toast.loading('Adding next of kin...', { id: loadingToast })
       try {
         await axios.post(
           `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members/${memberId}/next-of-kin`,
@@ -126,6 +133,7 @@ const RegisterMember = () => {
 
       // 4. Add beneficiary if provided
       if (data.beneficiaryName) {
+        toast.loading('Adding beneficiary...', { id: loadingToast })
         try {
           await axios.post(
             `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members/${memberId}/next-of-kin`,
@@ -143,9 +151,25 @@ const RegisterMember = () => {
         }
       }
 
-      toast.success('Member registered successfully!')
+      // Success!
+      toast.success(`Member registered successfully! Member Number: ${memberNumber}`, { 
+        id: loadingToast,
+        duration: 4000 
+      })
+      
+      // Refresh member list
       dispatch(fetchMembers())
-      navigate('/members')
+      
+      // Navigate after a short delay so user can see the success message
+      setTimeout(() => {
+        navigate('/members')
+      }, 1500)
+      
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast.error(error.response?.data?.message || 'Failed to register member')
+    }
+  }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to register member')
     }

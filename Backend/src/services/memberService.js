@@ -131,6 +131,17 @@ class MemberService {
       const idExists = await memberRepository.findByNationalId(data.nationalId, organizationId);
       if (idExists) throw new ConflictError('A member with this national ID already exists.');
 
+      // Check if email is already used by another user
+      if (data.email) {
+        const emailExists = await User.findOne({ 
+          where: { 
+            email: data.email.toLowerCase(), 
+            organizationId 
+          } 
+        });
+        if (emailExists) throw new ConflictError('A user with this email already exists.');
+      }
+
       // Generate member number
       const sequence = await memberRepository.getNextSequence(organizationId);
       const memberNumber = generateMemberNumber(sequence);
@@ -145,7 +156,45 @@ class MemberService {
         joiningDate: data.joiningDate || new Date(),
       }, { transaction: t });
 
-      // 2. Auto-create ordinary savings account
+      // 2. Create user account for login if email is provided
+      if (data.email) {
+        // Find Member role
+        const [memberRole] = await Role.findOrCreate({
+          where: { slug: ROLES.MEMBER, organizationId },
+          defaults: { 
+            name: 'Member', 
+            slug: ROLES.MEMBER, 
+            description: 'Member self-service portal',
+            isSystem: true 
+          },
+          transaction: t
+        });
+
+        // Generate temporary password
+        const tempPassword = `${data.firstName}@${Math.random().toString(36).slice(-4)}`;
+
+        // Create user account (inactive until member is activated)
+        await User.create({
+          organizationId,
+          branchId,
+          roleId: memberRole.id,
+          memberId: member.id,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email.toLowerCase(),
+          phone: data.phone,
+          password: tempPassword,
+          role: ROLES.MEMBER,
+          status: 'inactive',
+          isEmailVerified: false,
+          mustChangePassword: true,
+        }, { transaction: t });
+
+        // Store temp password for email (will be sent when member is activated)
+        member.tempPassword = tempPassword;
+      }
+
+      // 3. Auto-create ordinary savings account
       await SavingsAccount.create({
         organizationId,
         branchId,
@@ -157,7 +206,7 @@ class MemberService {
         status: 'active',
       }, { transaction: t });
 
-      // 3. Auto-create share capital account
+      // 4. Auto-create share capital account
       await SavingsAccount.create({
         organizationId,
         branchId,
@@ -170,13 +219,6 @@ class MemberService {
       }, { transaction: t });
 
       await t.commit();
-
-      // 4. Send welcome email
-      if (member.email) {
-        emailService.sendWelcomeEmail(member).catch((e) =>
-          logger.error('Welcome email failed:', e.message)
-        );
-      }
 
       logger.info(`New member registered: ${memberNumber} in org ${organizationId}`);
       return this.getById(member.id, organizationId);
@@ -272,14 +314,17 @@ class MemberService {
         // 4. Send activation email with login credentials
         if (member.email) {
           try {
+            // Get the user to check if temporary password exists
             const emailData = {
-              ...member.toJSON(),
               firstName: member.firstName,
               lastName: member.lastName,
               email: member.email,
               memberNumber: member.memberNumber,
+              loginEmail: userAccount.email,
+              // Note: For security, consider sending a password reset link instead
+              portalUrl: process.env.FRONTEND_URL || 'http://localhost:5174',
             };
-            await emailService.sendWelcomeEmail(emailData);
+            await emailService.sendMemberActivationEmail(emailData);
             logger.info(`Activation email sent to member: ${member.email}`);
           } catch (emailError) {
             logger.error(`Failed to send activation email to ${member.email}:`, emailError.message);
