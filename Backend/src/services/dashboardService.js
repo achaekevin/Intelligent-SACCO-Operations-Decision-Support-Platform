@@ -7,10 +7,15 @@ class DashboardService {
   async getAdminStats(organizationId) {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
 
     // Total Members
     const totalMembers = await Member.count({
       where: { organizationId, status: { [Op.in]: ['active', 'pending'] } }
+    });
+
+    const activeMembers = await Member.count({
+      where: { organizationId, status: 'active' }
     });
 
     // Total Savings (all active savings accounts)
@@ -31,6 +36,14 @@ class DashboardService {
       where: { organizationId, status: 'pending' }
     });
 
+    // Outstanding Loan Principal
+    const [[loanResult]] = await sequelize.query(
+      `SELECT SUM(principalBalance) as total FROM loans 
+       WHERE organizationId = ? AND status = 'disbursed' AND deletedAt IS NULL`,
+      { replacements: [organizationId] }
+    );
+    const outstandingLoans = parseFloat(loanResult?.total || 0);
+
     // Total Deposits (Month to Date)
     const [[depositsResult]] = await sequelize.query(
       `SELECT SUM(amount) as total FROM savings_transactions 
@@ -40,14 +53,52 @@ class DashboardService {
     );
     const totalDeposits = parseFloat(depositsResult?.total || 0);
 
-    // Monthly Income (interest + fees from savings transactions)
-    const [[incomeResult]] = await sequelize.query(
+    // Total Withdrawals (Month to Date)
+    const [[withdrawalsResult]] = await sequelize.query(
       `SELECT SUM(amount) as total FROM savings_transactions 
-       WHERE organizationId = ? AND type IN ('interest', 'fee') 
+       WHERE organizationId = ? AND type = 'withdrawal' 
        AND status = 'completed' AND createdAt >= ?`,
       { replacements: [organizationId, startOfMonth] }
     );
-    const monthlyIncome = parseFloat(incomeResult?.total || 0);
+    const totalWithdrawals = parseFloat(withdrawalsResult?.total || 0);
+
+    // Monthly Income (interest + fees from loans)
+    const [[interestResult]] = await sequelize.query(
+      `SELECT SUM(interestPaid) as total FROM loan_repayments 
+       WHERE organizationId = ? AND status IN ('paid', 'partial') 
+       AND paymentDate >= ? AND deletedAt IS NULL`,
+      { replacements: [organizationId, startOfMonth] }
+    );
+    const interestIncome = parseFloat(interestResult?.total || 0);
+
+    const [[feesResult]] = await sequelize.query(
+      `SELECT SUM(processingFee + insuranceFee) as total FROM loans 
+       WHERE organizationId = ? AND status IN ('disbursed', 'completed') 
+       AND disbursedAt >= ? AND deletedAt IS NULL`,
+      { replacements: [organizationId, startOfMonth] }
+    );
+    const feeIncome = parseFloat(feesResult?.total || 0);
+
+    const monthlyIncome = interestIncome + feeIncome;
+
+    // Year to Date Revenue
+    const [[ytdInterestResult]] = await sequelize.query(
+      `SELECT SUM(interestPaid) as total FROM loan_repayments 
+       WHERE organizationId = ? AND status IN ('paid', 'partial') 
+       AND paymentDate >= ? AND deletedAt IS NULL`,
+      { replacements: [organizationId, startOfYear] }
+    );
+    const ytdInterest = parseFloat(ytdInterestResult?.total || 0);
+
+    const [[ytdFeesResult]] = await sequelize.query(
+      `SELECT SUM(processingFee + insuranceFee) as total FROM loans 
+       WHERE organizationId = ? AND status IN ('disbursed', 'completed') 
+       AND disbursedAt >= ? AND deletedAt IS NULL`,
+      { replacements: [organizationId, startOfYear] }
+    );
+    const ytdFees = parseFloat(ytdFeesResult?.total || 0);
+
+    const yearToDateRevenue = ytdInterest + ytdFees;
 
     // Total Branches
     const totalBranches = await Branch.count({
@@ -55,10 +106,10 @@ class DashboardService {
     });
 
     // Loan Default Rate
-    const totalLoanAmount = await Loan.sum('principal', {
+    const totalLoanAmount = await Loan.sum('principalAmount', {
       where: { organizationId, status: { [Op.in]: ['disbursed', 'defaulted', 'completed'] } }
     });
-    const defaultedLoanAmount = await Loan.sum('principal', {
+    const defaultedLoanAmount = await Loan.sum('principalAmount', {
       where: { organizationId, status: 'defaulted' }
     });
     const loanDefaultRate = totalLoanAmount > 0 
@@ -67,11 +118,16 @@ class DashboardService {
 
     return {
       totalMembers,
+      activeMembers,
       totalSavings,
       activeLoans,
       pendingLoans,
+      outstandingLoans,
       totalDeposits,
+      totalWithdrawals,
+      netCashFlow: totalDeposits - totalWithdrawals,
       monthlyIncome,
+      yearToDateRevenue,
       totalBranches,
       loanDefaultRate: parseFloat(loanDefaultRate),
     };
@@ -107,9 +163,14 @@ class DashboardService {
   }
 
   async getMemberStats(organizationId, userId) {
-    // Find member by userId
+    // Find member by userId (user.id is directly the userId from auth table)
     const member = await Member.findOne({
-      where: { organizationId, userId }
+      where: { organizationId },
+      include: [{
+        model: require('./index.js').User,
+        as: 'userAccount',
+        where: { id: userId }
+      }]
     });
 
     if (!member) {
@@ -153,7 +214,7 @@ class DashboardService {
 
     // Total Loan Balance
     const [[loanBalanceResult]] = await sequelize.query(
-      `SELECT SUM(balance) as total FROM loans 
+      `SELECT SUM(principalBalance) as total FROM loans 
        WHERE organizationId = ? AND memberId = ? AND status = 'disbursed' AND deletedAt IS NULL`,
       { replacements: [organizationId, member.id] }
     );
@@ -165,13 +226,20 @@ class DashboardService {
       activeLoans,
       totalLoanBalance,
       memberSince: member.createdAt,
+      memberNumber: member.memberNumber,
+      memberName: `${member.firstName} ${member.lastName}`,
     };
   }
 
   async getMemberTransactions(organizationId, userId, limit = 10) {
     // Find member by userId
     const member = await Member.findOne({
-      where: { organizationId, userId }
+      where: { organizationId },
+      include: [{
+        model: require('./index.js').User,
+        as: 'userAccount',
+        where: { id: userId }
+      }]
     });
 
     if (!member) {
@@ -195,6 +263,7 @@ class DashboardService {
       status: tx.status,
       date: tx.createdAt,
       description: tx.description,
+      balanceAfter: tx.balanceAfter,
     }));
   }
 

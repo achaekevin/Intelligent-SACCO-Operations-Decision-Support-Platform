@@ -90,7 +90,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {loading ? (
-          Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+          Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
         ) : stats ? (
           <>
             <StatCard 
@@ -99,6 +99,7 @@ const Dashboard = () => {
               icon={Users} 
               accent="teal" 
               onClick={() => navigate('/members')}
+              subtitle={`${stats.activeMembers || 0} active`}
             />
             <StatCard 
               label="Total Savings" 
@@ -122,18 +123,42 @@ const Dashboard = () => {
               onClick={() => navigate('/loans?status=pending')}
             />
             <StatCard 
+              label="Outstanding Loans" 
+              value={formatKES(stats.outstandingLoans)} 
+              icon={HandCoins} 
+              accent="danger" 
+              onClick={() => navigate('/loans?status=disbursed')}
+            />
+            <StatCard 
               label="Total Deposits (MTD)" 
               value={formatKES(stats.totalDeposits)} 
               icon={Wallet} 
               accent="teal" 
               onClick={() => navigate('/savings/deposits')}
+              subtitle={`Withdrawals: ${formatKES(stats.totalWithdrawals)}`}
             />
             <StatCard 
-              label="Monthly Income" 
+              label="Net Cash Flow (MTD)" 
+              value={formatKES(stats.netCashFlow)} 
+              icon={TrendingUp} 
+              accent={stats.netCashFlow >= 0 ? 'teal' : 'danger'} 
+              onClick={() => navigate('/transactions')}
+            />
+            <StatCard 
+              label="Monthly Revenue" 
               value={formatKES(stats.monthlyIncome)} 
               icon={TrendingUp} 
               accent="info" 
-              onClick={() => navigate('/accounting/income-expenses')}
+              onClick={() => navigate('/reports/financial')}
+              subtitle="Interest + Fees"
+            />
+            <StatCard 
+              label="YTD Revenue" 
+              value={formatKES(stats.yearToDateRevenue)} 
+              icon={TrendingUp} 
+              accent="info" 
+              onClick={() => navigate('/reports/financial')}
+              subtitle="Year to Date"
             />
             <StatCard 
               label="Total Branches" 
@@ -148,6 +173,14 @@ const Dashboard = () => {
               icon={AlertTriangle} 
               accent="danger" 
               onClick={() => navigate('/loans?status=defaulted')}
+            />
+            <StatCard 
+              label="Portfolio Health" 
+              value={`${(100 - stats.loanDefaultRate).toFixed(2)}%`} 
+              icon={TrendingUp} 
+              accent="teal" 
+              onClick={() => navigate('/loans')}
+              subtitle="Performing Loans"
             />
           </>
         ) : (
