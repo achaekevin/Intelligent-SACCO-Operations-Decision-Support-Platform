@@ -21,18 +21,22 @@ export const TextInput = ({ register, name, error, ...rest }) => (
   />
 )
 
-export const SelectInput = ({ register, name, error, options = [], placeholder = 'Select...', ...rest }) => (
+export const SelectInput = ({ register, name, error, options = [], placeholder = 'Select...', children, ...rest }) => (
   <select
     {...(register ? register(name) : {})}
     className={`${baseInputClass} ${error ? 'border-danger' : 'border-ink-200 dark:border-ink-600'}`}
     {...rest}
   >
-    <option value="">{placeholder}</option>
-    {options.map((opt) => (
-      <option key={opt.value ?? opt} value={opt.value ?? opt}>
-        {opt.label ?? opt}
-      </option>
-    ))}
+    {children || (
+      <>
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt.value ?? opt} value={opt.value ?? opt}>
+            {opt.label ?? opt}
+          </option>
+        ))}
+      </>
+    )}
   </select>
 )
 
