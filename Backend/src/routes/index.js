@@ -11,6 +11,7 @@ import reportRoutes from './reportRoutes.js';
 import mpesaRoutes from './mpesaRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
+import dashboardRoutes from './dashboardRoutes.js';
 
 const router = Router();
 
@@ -36,5 +37,6 @@ router.use('/reports',       reportRoutes);
 router.use('/mpesa',         mpesaRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/audit-logs',    auditLogRoutes);
+router.use('/dashboard',     dashboardRoutes);
 
 export default router;

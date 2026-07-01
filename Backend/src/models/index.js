@@ -62,6 +62,10 @@ SavingsAccount.belongsTo(Branch, { foreignKey: 'branchId', as: 'branch' });
 SavingsAccount.hasMany(SavingsTransaction, { foreignKey: 'savingsAccountId', as: 'transactions' });
 SavingsTransaction.belongsTo(SavingsAccount, { foreignKey: 'savingsAccountId', as: 'account' });
 
+// ─── Member ↔ SavingsTransaction ──────────────────────────────
+Member.hasMany(SavingsTransaction, { foreignKey: 'memberId', as: 'transactions' });
+SavingsTransaction.belongsTo(Member, { foreignKey: 'memberId', as: 'member' });
+
 // ─── Member ↔ Loan ────────────────────────────────────────────
 Member.hasMany(Loan, { foreignKey: 'memberId', as: 'loans' });
 Loan.belongsTo(Member, { foreignKey: 'memberId', as: 'member' });
