@@ -245,6 +245,25 @@ class MemberService {
             logger.error('Login credentials email failed:', e.message)
           );
         }, 2000);
+
+        // Send admin notification email (Email #3)
+        setTimeout(() => {
+          // Send to SMTP_USER (admin email)
+          emailService.sendAdminNotificationEmail(
+            process.env.SMTP_USER,
+            {
+              id: member.id,
+              firstName: member.firstName,
+              lastName: member.lastName,
+              email: member.email,
+              phone: member.phone,
+              memberNumber: member.memberNumber,
+            },
+            orgName
+          ).catch((e) =>
+            logger.error('Admin notification email failed:', e.message)
+          );
+        }, 4000);
       }
 
       logger.info(`New member registered: ${memberNumber} in org ${organizationId}`);

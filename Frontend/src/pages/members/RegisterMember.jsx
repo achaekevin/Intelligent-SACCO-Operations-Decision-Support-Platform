@@ -187,14 +187,13 @@ const RegisterMember = () => {
 
       toast.success(`Member registered successfully! Member Number: ${memberNumber}`, { 
         id: loadingToast,
-        duration: 4000 
+        duration: 3000 
       });
       
       dispatch(fetchMembers());
       
-      setTimeout(() => {
-        navigate('/members');
-      }, 1500);
+      // Navigate immediately
+      navigate('/members');
       
     } catch (error) {
       console.error('Registration error:', error);

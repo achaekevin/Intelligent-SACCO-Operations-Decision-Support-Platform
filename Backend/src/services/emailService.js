@@ -120,6 +120,46 @@ class EmailService {
     });
   }
 
+  async sendAdminNotificationEmail(adminEmail, member, organizationName) {
+    return this.send({
+      to: adminEmail,
+      subject: `New Member Registration - ${member.memberNumber}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f9fafb">
+          <div style="background:#fff;padding:30px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+            <div style="text-align:center;margin-bottom:20px">
+              <h1 style="color:#0B4F4A;margin:0">New Member Registered</h1>
+            </div>
+            <p style="font-size:16px;color:#374151">Hello Admin,</p>
+            <p style="font-size:16px;color:#374151;line-height:1.6">
+              A new member has been successfully registered in <strong>${organizationName}</strong>.
+            </p>
+            <div style="background:#f0fdfa;padding:20px;border-radius:6px;margin:20px 0;border-left:4px solid #0B4F4A">
+              <p style="margin:0;font-size:14px;color:#374151"><strong>Member Name:</strong> ${member.firstName} ${member.lastName}</p>
+              <p style="margin:8px 0 0 0;font-size:14px;color:#374151"><strong>Member Number:</strong> ${member.memberNumber}</p>
+              <p style="margin:8px 0 0 0;font-size:14px;color:#374151"><strong>Email:</strong> ${member.email}</p>
+              <p style="margin:8px 0 0 0;font-size:14px;color:#374151"><strong>Phone:</strong> ${member.phone || 'N/A'}</p>
+              <p style="margin:8px 0 0 0;font-size:14px;color:#374151"><strong>Registration Date:</strong> ${new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+            <div style="text-align:center;margin:30px 0">
+              <a href="${process.env.FRONTEND_URL}/members/${member.id}" style="display:inline-block;padding:14px 32px;background:#0B4F4A;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:16px">
+                View Member Details
+              </a>
+            </div>
+            <p style="font-size:14px;color:#6b7280;line-height:1.6">
+              The member has been sent their login credentials via email.
+            </p>
+            <hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0">
+            <p style="font-size:14px;color:#6b7280;text-align:center;margin:0">
+              ${organizationName}<br>
+              This is an automated notification
+            </p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
   async sendMemberLoginCredentials(member, loginEmail, tempPassword, organizationName) {
     return this.send({
       to: member.email,
