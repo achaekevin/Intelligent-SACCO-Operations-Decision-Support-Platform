@@ -56,6 +56,36 @@ class LoanController {
       return createdResponse(res, { message: 'Guarantor added.', data: guarantor });
     } catch (err) { next(err); }
   }
+  async listGuarantors(req, res, next) {
+    try {
+      const result = await loanService.listGuarantors(req.user.organizationId, req.query);
+      return paginatedResponse(res, { data: result.guarantors, total: result.total, page: result.page, limit: result.limit });
+    } catch (err) { next(err); }
+  }
+  async acceptGuarantor(req, res, next) {
+    try {
+      const guarantor = await loanService.acceptGuarantor(req.params.id, req.user.organizationId, req.user.memberId);
+      return successResponse(res, { message: 'Guarantor request accepted.', data: guarantor });
+    } catch (err) { next(err); }
+  }
+  async declineGuarantor(req, res, next) {
+    try {
+      const guarantor = await loanService.declineGuarantor(req.params.id, req.user.organizationId, req.user.memberId);
+      return successResponse(res, { message: 'Guarantor request declined.', data: guarantor });
+    } catch (err) { next(err); }
+  }
+  async releaseGuarantor(req, res, next) {
+    try {
+      const guarantor = await loanService.releaseGuarantor(req.params.id, req.user.organizationId, req.user.id);
+      return successResponse(res, { message: 'Guarantor released.', data: guarantor });
+    } catch (err) { next(err); }
+  }
+  async getGuarantorLiability(req, res, next) {
+    try {
+      const result = await loanService.getGuarantorLiability(req.params.memberId, req.user.organizationId);
+      return successResponse(res, { data: result });
+    } catch (err) { next(err); }
+  }
   async getStats(req, res, next) {
     try {
       const stats = await loanService.getStats(req.user.organizationId);

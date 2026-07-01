@@ -248,7 +248,114 @@ class LoanService {
     const guarantor = await Member.findOne({ where: { id: memberId, organizationId, status: 'active' } });
     if (!guarantor) throw new NotFoundError('Guarantor member not found or not active.');
 
+    // Check if already a guarantor for this loan
+    const existing = await Guarantor.findOne({ where: { loanId, memberId } });
+    if (existing) throw new AppError('This member is already a guarantor for this loan.', 400);
+
+    // Validate guarantor's savings capacity
+    const guarantorSavings = await this._getMemberTotalSavings(memberId, organizationId);
+    if (amountGuaranteed > guarantorSavings) {
+      throw new AppError(
+        `Guarantor's savings (KES ${guarantorSavings.toLocaleString()}) are insufficient to guarantee KES ${amountGuaranteed.toLocaleString()}.`, 400
+      );
+    }
+
     return Guarantor.create({ organizationId, loanId, memberId, amountGuaranteed, remainingLiability: amountGuaranteed });
+  }
+
+  async listGuarantors(organizationId, query = {}) {
+    const { page, limit, offset } = getPagination(query);
+    const where = { organizationId };
+    if (query.memberId) where.memberId = query.memberId;
+    if (query.loanId) where.loanId = query.loanId;
+    if (query.status) where.status = query.status;
+
+    const { rows, count } = await Guarantor.findAndCountAll({
+      where, limit, offset,
+      order: [['createdAt', 'DESC']],
+      include: [
+        { 
+          model: Member, 
+          as: 'guarantor', 
+          attributes: ['id', 'firstName', 'lastName', 'memberNumber', 'email', 'phone'] 
+        },
+        { 
+          model: Loan, 
+          as: 'loan',
+          attributes: ['id', 'loanNumber', 'principalAmount', 'status', 'type'],
+          include: [
+            { model: Member, as: 'member', attributes: ['id', 'firstName', 'lastName', 'memberNumber'] }
+          ]
+        },
+      ],
+    });
+    return { guarantors: rows, total: count, page, limit };
+  }
+
+  async acceptGuarantor(guarantorId, organizationId, memberId) {
+    const guarantor = await Guarantor.findOne({ where: { id: guarantorId, organizationId } });
+    if (!guarantor) throw new NotFoundError('Guarantor record not found.');
+    if (guarantor.memberId !== memberId) throw new ForbiddenError('You can only accept your own guarantor requests.');
+    if (guarantor.status !== 'pending') throw new AppError(`Cannot accept guarantor with status: ${guarantor.status}.`, 400);
+
+    await guarantor.update({ status: 'accepted', acceptedAt: new Date() });
+    logger.info(`Guarantor ${guarantorId} accepted by member ${memberId}`);
+    return guarantor;
+  }
+
+  async declineGuarantor(guarantorId, organizationId, memberId) {
+    const guarantor = await Guarantor.findOne({ where: { id: guarantorId, organizationId } });
+    if (!guarantor) throw new NotFoundError('Guarantor record not found.');
+    if (guarantor.memberId !== memberId) throw new ForbiddenError('You can only decline your own guarantor requests.');
+    if (guarantor.status !== 'pending') throw new AppError(`Cannot decline guarantor with status: ${guarantor.status}.`, 400);
+
+    await guarantor.update({ status: 'declined' });
+    logger.info(`Guarantor ${guarantorId} declined by member ${memberId}`);
+    return guarantor;
+  }
+
+  async releaseGuarantor(guarantorId, organizationId, releasedBy) {
+    const guarantor = await Guarantor.findOne({ 
+      where: { id: guarantorId, organizationId },
+      include: [{ model: Loan, as: 'loan' }]
+    });
+    if (!guarantor) throw new NotFoundError('Guarantor record not found.');
+    if (!['completed', 'rejected'].includes(guarantor.loan.status)) {
+      throw new AppError('Guarantors can only be released when loan is completed or rejected.', 400);
+    }
+
+    await guarantor.update({ 
+      status: 'released', 
+      releasedAt: new Date(), 
+      releasedBy,
+      remainingLiability: 0 
+    });
+    logger.info(`Guarantor ${guarantorId} released by ${releasedBy}`);
+    return guarantor;
+  }
+
+  async getGuarantorLiability(memberId, organizationId) {
+    const guarantors = await Guarantor.findAll({
+      where: { memberId, organizationId, status: { [Op.in]: ['pending', 'accepted'] } },
+      include: [{ 
+        model: Loan, 
+        as: 'loan',
+        attributes: ['id', 'loanNumber', 'principalAmount', 'principalBalance', 'status', 'type'],
+        include: [{ model: Member, as: 'member', attributes: ['firstName', 'lastName', 'memberNumber'] }]
+      }],
+    });
+
+    const totalGuaranteed = guarantors.reduce((sum, g) => sum + parseFloat(g.amountGuaranteed), 0);
+    const totalLiability = guarantors.reduce((sum, g) => sum + parseFloat(g.remainingLiability), 0);
+
+    return {
+      guarantors,
+      summary: {
+        totalLoansGuaranteed: guarantors.length,
+        totalAmountGuaranteed: formatAmount(totalGuaranteed),
+        totalRemainingLiability: formatAmount(totalLiability),
+      },
+    };
   }
 
   async getStats(organizationId) {

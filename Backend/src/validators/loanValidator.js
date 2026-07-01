@@ -43,6 +43,14 @@ export const addGuarantorSchema = Joi.object({
   amountGuaranteed: Joi.number().positive().required().label('Guaranteed amount'),
 });
 
+export const guarantorListQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(20),
+  memberId: Joi.string().uuid().optional(),
+  loanId: Joi.string().uuid().optional(),
+  status: Joi.string().valid('pending', 'accepted', 'declined', 'released').optional(),
+});
+
 export const restructureLoanSchema = Joi.object({
   newTermMonths: Joi.number().integer().min(1).max(120).required(),
   newInterestRate: Joi.number().min(0).max(100).optional(),
