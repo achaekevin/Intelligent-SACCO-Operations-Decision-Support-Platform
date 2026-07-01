@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-import { useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { toast } from 'react-hot-toast'
-import { Camera, X } from 'lucide-react'
-import PageHeader from '../../components/common/PageHeader'
-import { FormField, TextInput, SelectInput } from '../../components/forms/FormField'
-import Button from '../../components/common/Button'
-import Card from '../../components/common/Card'
-import { fetchMembers } from '../../redux/slices/membersSlice'
-import axios from 'axios'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-hot-toast';
+import { Camera, X } from 'lucide-react';
+import PageHeader from '../../components/common/PageHeader';
+import { FormField, TextInput, SelectInput } from '../../components/forms/FormField';
+import Button from '../../components/common/Button';
+import Card from '../../components/common/Card';
+import { fetchMembers } from '../../redux/slices/membersSlice';
+import axios from 'axios';
 
 const schema = yup.object({
   firstName: yup.string().required('First name is required'),
@@ -24,90 +24,101 @@ const schema = yup.object({
   address: yup.string().required('Address is required'),
   occupation: yup.string(),
   employer: yup.string(),
-  // Next of Kin
   nextOfKinName: yup.string().required('Next of kin name is required'),
   nextOfKinPhone: yup.string().required('Next of kin phone is required'),
   nextOfKinRelationship: yup.string().required('Relationship is required'),
   nextOfKinAddress: yup.string(),
-  // Beneficiary  
   beneficiaryName: yup.string(),
   beneficiaryPhone: yup.string(),
   beneficiaryRelationship: yup.string(),
-})
+});
 
 const RegisterMember = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const [profilePhoto, setProfilePhoto] = useState(null)
-  const [photoPreview, setPhotoPreview] = useState(null)
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: yupResolver(schema),
-  })
+  });
+
+  console.log('Logged in user:', user);
+  console.log('Form errors:', errors);
+  console.log('isSubmitting:', isSubmitting);
 
   const handlePhotoChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        toast.error('Photo must be less than 2MB')
-        return
+        toast.error('Photo must be less than 2MB');
+        return;
       }
-      setProfilePhoto(file)
-      setPhotoPreview(URL.createObjectURL(file))
+      setProfilePhoto(file);
+      setPhotoPreview(URL.createObjectURL(file));
     }
-  }
+  };
 
   const removePhoto = () => {
-    setProfilePhoto(null)
-    setPhotoPreview(null)
-  }
+    setProfilePhoto(null);
+    setPhotoPreview(null);
+  };
 
   const onSubmit = async (data) => {
-    let loadingToast
+    console.log('🔥 onSubmit called!', data);
+    alert('Form submitted! Check console.');
+    
+    let loadingToast;
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       
       if (!token) {
-        toast.error('You must be logged in to register a member')
-        return
+        toast.error('You must be logged in to register a member');
+        return;
       }
       
-      console.log('Starting member registration...')
-      console.log('Form data:', data)
+      console.log('Starting member registration...', data);
+      loadingToast = toast.loading('Registering member...');
       
-      // Show loading toast
-      loadingToast = toast.loading('Registering member...')
+      // Get branch ID from logged in user or use a default
+      const branchId = user?.branchId || user?.branch?.id;
       
-      // 1. Register the member
-      console.log('Sending request to:', `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members`)
+      if (!branchId) {
+        toast.error('Branch information missing. Please contact administrator.', {
+          id: loadingToast
+        });
+        return;
+      }
+      
+      console.log('Using branchId:', branchId);
       
       const memberRes = await axios.post(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members`,
         {
           firstName: data.firstName,
           lastName: data.lastName,
-          email: data.email,
+          email: data.email || null,
           phone: data.phone,
           nationalId: data.nationalId,
           dateOfBirth: data.dateOfBirth,
           gender: data.gender,
           address: data.address,
-          occupation: data.occupation,
-          employer: data.employer,
+          occupation: data.occupation || null,
+          employer: data.employer || null,
+          branchId: branchId,
         },
         { headers: { Authorization: `Bearer ${token}` } }
-      )
+      );
 
-      console.log('Member registration response:', memberRes.data)
+      console.log('Member created:', memberRes.data);
+      const memberId = memberRes.data.data.id;
+      const memberNumber = memberRes.data.data.memberNumber;
 
-      const memberId = memberRes.data.data.id
-      const memberNumber = memberRes.data.data.memberNumber
-
-      // 2. Upload profile photo if provided
       if (profilePhoto) {
-        toast.loading('Uploading profile photo...', { id: loadingToast })
-        const formData = new FormData()
-        formData.append('document', profilePhoto)
-        formData.append('documentType', 'profile_photo')
+        toast.loading('Uploading profile photo...', { id: loadingToast });
+        const formData = new FormData();
+        formData.append('document', profilePhoto);
+        formData.append('documentType', 'profile_photo');
         
         try {
           await axios.post(
@@ -119,80 +130,88 @@ const RegisterMember = () => {
                 'Content-Type': 'multipart/form-data'
               } 
             }
-          )
+          );
         } catch (photoError) {
-          console.error('Photo upload failed:', photoError)
-          toast.error('Photo upload failed, but member was registered', { id: loadingToast })
+          console.error('Photo upload failed:', photoError);
         }
       }
 
-      // 3. Add next of kin
-      toast.loading('Adding next of kin...', { id: loadingToast })
+      toast.loading('Adding next of kin...', { id: loadingToast });
       try {
+        // Split the name into firstName and lastName for backend
+        const kinNames = data.nextOfKinName.trim().split(' ');
+        const kinFirstName = kinNames[0] || data.nextOfKinName;
+        const kinLastName = kinNames.slice(1).join(' ') || kinNames[0];
+        
         await axios.post(
           `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members/${memberId}/next-of-kin`,
           {
-            name: data.nextOfKinName,
+            firstName: kinFirstName,
+            lastName: kinLastName,
             phone: data.nextOfKinPhone,
             relationship: data.nextOfKinRelationship,
-            address: data.nextOfKinAddress,
+            address: data.nextOfKinAddress || null,
             isPrimary: true,
           },
           { headers: { Authorization: `Bearer ${token}` } }
-        )
+        );
       } catch (kinError) {
-        console.error('Next of kin failed:', kinError)
+        console.error('Next of kin failed:', kinError);
+        console.error('Next of kin error response:', kinError.response?.data);
       }
 
-      // 4. Add beneficiary if provided
       if (data.beneficiaryName) {
-        toast.loading('Adding beneficiary...', { id: loadingToast })
+        toast.loading('Adding beneficiary...', { id: loadingToast });
         try {
+          // Split the name into firstName and lastName for backend
+          const benefNames = data.beneficiaryName.trim().split(' ');
+          const benefFirstName = benefNames[0] || data.beneficiaryName;
+          const benefLastName = benefNames.slice(1).join(' ') || benefNames[0];
+          
           await axios.post(
             `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/members/${memberId}/next-of-kin`,
             {
-              name: data.beneficiaryName,
+              firstName: benefFirstName,
+              lastName: benefLastName,
               phone: data.beneficiaryPhone,
               relationship: data.beneficiaryRelationship,
-              isBeneficiary: true,
               isPrimary: false,
             },
             { headers: { Authorization: `Bearer ${token}` } }
-          )
+          );
         } catch (benefError) {
-          console.error('Beneficiary failed:', benefError)
+          console.error('Beneficiary failed:', benefError);
+          console.error('Beneficiary error response:', benefError.response?.data);
         }
       }
 
-      // Success!
       toast.success(`Member registered successfully! Member Number: ${memberNumber}`, { 
         id: loadingToast,
         duration: 4000 
-      })
+      });
       
-      // Refresh member list
-      dispatch(fetchMembers())
+      dispatch(fetchMembers());
       
-      // Navigate after a short delay so user can see the success message
       setTimeout(() => {
-        navigate('/members')
-      }, 1500)
+        navigate('/members');
+      }, 1500);
       
     } catch (error) {
-      console.error('Registration error:', error)
-      console.error('Error response:', error.response)
-      console.error('Error data:', error.response?.data)
+      console.error('Registration error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error data:', error.response?.data);
+      console.error('Error message:', error.response?.data?.message);
+      console.error('Error details:', error.response?.data?.errors);
       
-      // Dismiss the loading toast if it exists
       if (loadingToast) {
         toast.error(error.response?.data?.message || 'Failed to register member', {
           id: loadingToast
-        })
+        });
       } else {
-        toast.error(error.response?.data?.message || 'Failed to register member')
+        toast.error(error.response?.data?.message || 'Failed to register member');
       }
     }
-  }
+  };
 
   return (
     <div>
@@ -200,7 +219,6 @@ const RegisterMember = () => {
       
       <Card>
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
-          {/* Profile Photo */}
           <div>
             <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3">Profile Photo</h3>
             <div className="flex items-center gap-4">
@@ -244,7 +262,6 @@ const RegisterMember = () => {
             </div>
           </div>
 
-          {/* Personal Details */}
           <div>
             <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3">Personal Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -301,7 +318,6 @@ const RegisterMember = () => {
             </div>
           </div>
 
-          {/* Address */}
           <div>
             <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3">Address</h3>
             <FormField label="Physical address" error={errors.address} required>
@@ -315,7 +331,6 @@ const RegisterMember = () => {
             </FormField>
           </div>
 
-          {/* Next of Kin */}
           <div>
             <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3">Next of Kin</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -341,7 +356,6 @@ const RegisterMember = () => {
             </div>
           </div>
 
-          {/* Beneficiary (Optional) */}
           <div>
             <h3 className="text-sm font-semibold text-ink-700 dark:text-ink-200 mb-3">Beneficiary (Optional)</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -364,9 +378,12 @@ const RegisterMember = () => {
             </div>
           </div>
 
-          {/* Submit */}
           <div className="flex items-center gap-3 pt-4 border-t border-ink-100 dark:border-ink-700">
-            <Button type="submit" loading={isSubmitting}>
+            <Button 
+              type="submit" 
+              loading={isSubmitting}
+              onClick={() => console.log('🔘 Button clicked!')}
+            >
               {isSubmitting ? 'Registering...' : 'Register Member'}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate('/members')}>Cancel</Button>
@@ -374,7 +391,7 @@ const RegisterMember = () => {
         </form>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default RegisterMember
+export default RegisterMember;
