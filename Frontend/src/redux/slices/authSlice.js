@@ -65,6 +65,7 @@ export const { loginStart, loginSuccess, loginFailure, logout, updateProfileStat
 // Real API login
 export const loginUser = ({ email, password, rememberMe }) => async (dispatch) => {
   dispatch(loginStart())
+  
   try {
     const response = await axios.post(`${API_URL}/auth/login`, { email, password })
     const { user, accessToken } = response.data.data
@@ -76,7 +77,7 @@ export const loginUser = ({ email, password, rememberMe }) => async (dispatch) =
     }))
     return user
   } catch (error) {
-    const message = error.response?.data?.message || 'Login failed'
+    const message = error.response?.data?.message || 'Invalid email or password'
     dispatch(loginFailure(message))
     throw new Error(message)
   }
@@ -84,18 +85,16 @@ export const loginUser = ({ email, password, rememberMe }) => async (dispatch) =
 
 // Real API profile update
 export const updateProfile = (profileData) => async (dispatch, getState) => {
+  const token = getState().auth.token || localStorage.getItem('accessToken')
+  const userId = getState().auth.user?.id
+  
   try {
-    const token = getState().auth.token || localStorage.getItem('accessToken')
-    const userId = getState().auth.user?.id
-    
-    // Call backend API to update profile
     const response = await axios.put(
       `${API_URL}/users/${userId}`,
       profileData,
       { headers: { Authorization: `Bearer ${token}` } }
     )
     
-    // Update Redux state with new data
     dispatch(updateProfileState(response.data.data))
     return response.data.data
   } catch (error) {
