@@ -1,20 +1,29 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { ChevronsLeft, ChevronsRight, X, Landmark } from 'lucide-react'
+import { ChevronsLeft, ChevronsRight, X, Landmark, LogOut } from 'lucide-react'
 import { NAV_ITEMS } from '../../constants/nav'
 import { ROUTE_ACCESS } from '../../constants/roles'
 import { toggleSidebar, closeMobileSidebar } from '../../redux/slices/uiSlice'
+import { useAuth } from '../../hooks/useAuth'
 import { classNames } from '../../utils/format'
 
 const Sidebar = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { sidebarCollapsed, mobileSidebarOpen } = useSelector((s) => s.ui)
-  const { user } = useSelector((s) => s.auth)
+  const { user, logout } = useAuth()
 
   const visibleItems = NAV_ITEMS.filter((item) => {
     const allowed = ROUTE_ACCESS[item.key]
     return !allowed || allowed.includes(user?.role)
   })
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout()
+      navigate('/login')
+    }
+  }
 
   return (
     <>
@@ -77,6 +86,19 @@ const Sidebar = () => {
           </ul>
         </nav>
 
+        {/* Logout Button */}
+        <div className="border-t border-ink-700/60 p-2">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            title={sidebarCollapsed ? 'Logout' : undefined}
+          >
+            <LogOut size={19} className="shrink-0" />
+            {!sidebarCollapsed && <span className="truncate">Logout</span>}
+          </button>
+        </div>
+
+        {/* Collapse Toggle */}
         <div className="hidden lg:flex items-center justify-center border-t border-ink-700/60 py-3">
           <button
             onClick={() => dispatch(toggleSidebar())}
