@@ -121,6 +121,8 @@ User.prototype.isLocked = function () {
 
 User.prototype.toSafeJSON = function () {
   const { password, twoFactorSecret, passwordResetToken, emailVerificationToken, ...safe } = this.toJSON();
+  // Add computed name field for frontend compatibility
+  safe.name = `${this.firstName} ${this.lastName}`.trim();
   return safe;
 };
 

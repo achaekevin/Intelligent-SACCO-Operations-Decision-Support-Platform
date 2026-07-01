@@ -100,7 +100,8 @@ const Login = () => {
   const onSubmit = async (data) => {
     try {
       const user = await dispatch(loginUser(data))
-      toast.success(`Welcome back, ${user.name.split(' ')[0]}!`)
+      const firstName = user.firstName || user.name?.split(' ')[0] || 'User'
+      toast.success(`Welcome back, ${firstName}!`)
       const dest = user.role === ROLES.MEMBER ? '/portal' : (location.state?.from?.pathname || '/dashboard')
       navigate(dest, { replace: true })
     } catch (err) {
