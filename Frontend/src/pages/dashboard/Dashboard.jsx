@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import TellerDashboard from './TellerDashboard'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
 import {
@@ -26,6 +27,11 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState([])
   const [savingsGrowth, setSavingsGrowth] = useState([])
   const [memberGrowth, setMemberGrowth] = useState([])
+
+  // Show Teller Dashboard for cashiers/tellers
+  if (user?.role === 'cashier' || user?.role === 'teller') {
+    return <TellerDashboard />;
+  }
 
   useEffect(() => {
     fetchDashboardData()

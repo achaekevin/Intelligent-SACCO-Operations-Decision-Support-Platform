@@ -1,272 +1,417 @@
-# SACCO Management System — Backend API
+# Amana SACCO Management System - Backend
 
-Production-ready, multi-tenant REST API for Kenyan SACCOs. Built with Node.js, Express, MySQL, Sequelize, JWT, Redis, Socket.IO, BullMQ, and Docker.
+A comprehensive, production-ready RESTful API for managing SACCO (Savings and Credit Cooperative) operations built with Node.js, Express, MySQL, and Redis.
 
----
+## 🚀 Features
 
-## Architecture
+### Core Modules
+- ✅ **Authentication & Authorization** - JWT-based auth, role-based access control (RBAC), email verification, password reset
+- ✅ **Member Management** - Registration, activation, profile management, KYC, next of kin, beneficiaries
+- ✅ **Branch Management** - Multi-branch support, branch performance tracking, manager assignment
+- ✅ **Savings Management** - Multiple account types (Ordinary, Share Capital, Fixed Deposit), deposits, withdrawals
+- ✅ **Loan Management** - Loan products, applications, approvals, disbursements, repayments, guarantors
+- ✅ **Transaction Engine** - Comprehensive transaction recording, reversals, receipts, audit trail
+- ✅ **Guarantor System** - Add guarantors, validate shares, liability tracking, acceptance/decline
+- ✅ **Notifications** - Multi-channel (In-app, Email, SMS), real-time updates, admin broadcast
+- ✅ **Reports & Analytics** - Members, Savings, Loans, Transactions, Financial reports (JSON/CSV/Excel/PDF)
+- ✅ **Dashboard** - Admin and Member dashboards with charts, statistics, recent activity
+- ✅ **Accounting** - Chart of accounts, journal entries, trial balance, income statements
+- ✅ **Audit Logging** - Complete audit trail of all system activities
 
-```
-Clean Architecture
-├── Routes          → HTTP entry points, Swagger annotations
-├── Middleware      → Auth (JWT + RBAC), validation, audit logging, error handling
-├── Controllers     → HTTP glue — parse request, call service, return response
-├── Services        → Business logic (all decisions live here)
-├── Repositories    → Data access layer (Sequelize queries, org-scoped)
-├── Models          → Sequelize models + associations
-├── Validators      → Joi schemas (input validation)
-└── Utils           → Helpers, error classes, response builders
-```
+### Technical Features
+- RESTful API architecture
+- JWT authentication with refresh tokens
+- Multi-tenancy (Organization isolation)
+- Role-based permissions
+- Request validation (Joi)
+- API documentation (Swagger/OpenAPI)
+- Real-time features (Socket.IO)
+- Background jobs (BullMQ - optional)
+- File uploads
+- Email service (Nodemailer)
+- SMS service (Africa's Talking/Twilio)
+- Database migrations & seeders
 
----
+## 🛠 Tech Stack
 
-## Modules
+- **Runtime:** Node.js 18+
+- **Framework:** Express.js
+- **Database:** MySQL 8.0
+- **Cache/Session:** Redis 3.0+ (5.0+ recommended for BullMQ)
+- **ORM:** Sequelize
+- **Authentication:** JWT (jsonwebtoken)
+- **Validation:** Joi
+- **File Upload:** Multer
+- **Email:** Nodemailer
+- **SMS:** Africa's Talking, Twilio
+- **Documentation:** Swagger/OpenAPI
+- **Real-time:** Socket.IO
+- **Queue:** BullMQ (optional)
+- **Logging:** Winston
 
-| Module | Status | Description |
-|---|---|---|
-| **Authentication** | ✅ Full | Register, Login, Logout, Refresh, Email Verify, Forgot/Reset/Change Password, Account Lockout |
-| **Organizations** | ✅ Full | Multi-tenant SACCO setup, settings, subscription plans |
-| **Branches** | ✅ Full | Multi-branch CRUD, manager assignment, stats |
-| **Members** | ✅ Full | Registration, documents, next of kin, activation/suspension, statements |
-| **Savings** | ✅ Full | Ordinary/Share Capital/Fixed Deposit accounts, Deposit/Withdraw/Transfer, Reversals, Interest Accrual |
-| **Loans** | 🔧 Stub | Full lifecycle: apply → approve → disburse → repay → close + guarantors |
-| **Accounting** | 🔧 Stub | Double-entry: chart of accounts, journal entries, trial balance, P&L, balance sheet |
-| **Reports** | 🔧 Stub | PDF/Excel/CSV exports for members, savings, loans, financials |
-| **M-Pesa** | 🔧 Stub | STK Push, paybill callback, B2C, reconciliation |
-| **Notifications** | 🔧 Stub | In-app + email + SMS, Socket.IO real-time |
-| **Audit Logs** | 🔧 Stub | Full action tracking with IP, user, module, timestamps |
+## 📋 Prerequisites
 
----
+- Node.js 18.x or higher
+- MySQL 8.0 or higher
+- Redis 3.0 or higher (5.0+ recommended)
+- npm or yarn
 
-## Quick Start
+## 🔧 Installation
 
-### Prerequisites
-- Node.js 20+
-- MySQL 8
-- Redis 7
-
+### 1. Clone the repository
 ```bash
-# 1. Clone and install
-git clone <repo-url>
-cd sacco-backend
-npm install
+git clone https://github.com/achaekevin/Sacco-Management-Platform.git
+cd "Sacco Management System/Backend"
+```
 
-# 2. Configure environment
+### 2. Install dependencies
+```bash
+npm install --legacy-peer-deps
+```
+
+### 3. Configure environment variables
+```bash
 cp .env.example .env
-# → Edit .env with your MySQL and Redis credentials
+```
 
-# 3. Run migrations and seed demo data
-npm run migrate
-npm run seed
+Edit `.env` with your configuration:
 
-# 4. Start development server
+```env
+# App Configuration
+NODE_ENV=development
+PORT=5000
+APP_NAME=Amana SACCO Management System
+FRONTEND_URL=http://localhost:5174
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=sacco_management_system
+DB_USER=sacco_user
+DB_PASSWORD=NewSecurePassword2026!
+DB_DIALECT=mysql
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_REFRESH_SECRET=your-refresh-secret-key-change-this-too
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+EMAIL_FROM=Amana SACCO <noreply@amanasacco.com>
+
+# SMS Configuration (Optional)
+SMS_ENABLED=false
+SMS_PROVIDER=africas_talking
+SMS_API_KEY=your-api-key
+SMS_USERNAME=sandbox
+SMS_SENDER_ID=AMANA
+
+# File Upload
+MAX_FILE_SIZE=5242880
+UPLOAD_DIR=uploads
+
+# Logging
+LOG_LEVEL=info
+```
+
+### 4. Database Setup
+
+**Create the database:**
+```sql
+CREATE DATABASE sacco_management_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'sacco_user'@'localhost' IDENTIFIED BY 'NewSecurePassword2026!';
+GRANT ALL PRIVILEGES ON sacco_management_system.* TO 'sacco_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+**Run migrations:**
+```bash
+npx sequelize-cli db:migrate
+```
+
+**Run seeders (creates roles, permissions, and demo data):**
+```bash
+npx sequelize-cli db:seed:all
+```
+
+### 5. Start the server
+
+**Development mode:**
+```bash
 npm run dev
 ```
 
-API: http://localhost:5000/api/v1  
-Swagger: http://localhost:5000/api-docs  
-Health: http://localhost:5000/api/v1/health
-
----
-
-## Docker (recommended)
-
+**Production mode:**
 ```bash
-cp .env.example .env
-docker compose up --build
+npm start
 ```
 
-Starts: MySQL 8 + Redis 7 + Express API + Nginx reverse proxy
+Server will start on `http://localhost:5000`
 
----
+## 🔐 Default Login Credentials
 
-## Demo Credentials
+After running the seeders, use these credentials to login:
 
-| Role | Email | Password |
-|---|---|---|
-| SACCO Admin | admin@umojasacco.co.ke | Admin@1234 |
-| Cashier | cashier@umojasacco.co.ke | Cash@1234 |
-| Member | member@umojasacco.co.ke | Member@1234 |
+### SACCO Admin
+- **Email:** admin@sacco.co.ke
+- **Password:** admin123
 
----
+### Loan Officer
+- **Email:** loans@sacco.co.ke
+- **Password:** loans123
 
-## API Endpoints
+### Teller/Cashier
+- **Email:** teller@sacco.co.ke
+- **Password:** teller123
 
-### Auth
+### Auditor
+- **Email:** auditor@sacco.co.ke
+- **Password:** auditor123
+
+### Member (Sample)
+- **Email:** member@sacco.co.ke
+- **Password:** member123
+
+> **Note:** Please change these default passwords immediately after first login in production environments.
+
+## 📚 API Documentation
+
+Once the server is running, access the Swagger API documentation at:
+
+**http://localhost:5000/api-docs**
+
+## 🏗 Project Structure
+
 ```
-POST   /api/v1/auth/register               Register new SACCO + admin
-POST   /api/v1/auth/login                  Login (returns JWT pair)
-POST   /api/v1/auth/logout                 Logout (blacklists token)
-POST   /api/v1/auth/refresh                Rotate refresh token
-GET    /api/v1/auth/me                     Current user profile
-POST   /api/v1/auth/verify-email           Verify email with token
-POST   /api/v1/auth/resend-verification    Resend verification email
-POST   /api/v1/auth/forgot-password        Request password reset
-POST   /api/v1/auth/reset-password         Reset with token
-POST   /api/v1/auth/change-password        Change password (auth required)
+Backend/
+├── src/
+│   ├── config/          # Configuration files (database, redis, swagger)
+│   ├── constants/       # Application constants (roles, statuses)
+│   ├── controllers/     # Request handlers
+│   ├── middlewares/     # Auth, validation, error handling
+│   ├── models/          # Sequelize models
+│   ├── routes/          # API routes
+│   ├── services/        # Business logic
+│   ├── validators/      # Joi validation schemas
+│   ├── utils/           # Helper functions
+│   ├── jobs/            # Background jobs (optional)
+│   ├── events/          # Event emitters
+│   ├── migrations/      # Database migrations
+│   ├── seeders/         # Database seeders
+│   └── server.js        # Application entry point
+├── uploads/             # Uploaded files (generated)
+├── logs/                # Application logs (generated)
+├── .env                 # Environment variables
+├── .sequelizerc         # Sequelize configuration
+├── package.json
+└── README.md
+```
+
+## 🔒 User Roles & Permissions
+
+### SACCO Admin
+- Full system access
+- Manage organizations, branches, users
+- Approve/reject loans
+- Access all reports and analytics
+- System configuration
+
+### Loan Officer
+- Manage loan applications
+- Process loan disbursements
+- View loan portfolios
+- Generate loan reports
+
+### Teller/Cashier
+- Process deposits and withdrawals
+- Handle transactions
+- View transaction history
+- Generate transaction reports
+
+### Auditor
+- View-only access to all modules
+- Access audit logs
+- Generate compliance reports
+- Monitor system activities
+
+### Member
+- View personal dashboard
+- Apply for loans
+- View savings accounts
+- Check transaction history
+- Download statements
+
+## 🌐 API Endpoints
+
+### Authentication
+```
+POST   /api/v1/auth/register              # Register organization
+POST   /api/v1/auth/login                 # Login
+POST   /api/v1/auth/refresh-token         # Refresh JWT token
+POST   /api/v1/auth/logout                # Logout
+POST   /api/v1/auth/forgot-password       # Request password reset
+POST   /api/v1/auth/reset-password        # Reset password
+POST   /api/v1/auth/verify-email          # Verify email
+POST   /api/v1/auth/change-password       # Change password
 ```
 
 ### Members
 ```
-GET    /api/v1/members                     List with pagination/search/filter
-POST   /api/v1/members                     Register new member
-GET    /api/v1/members/stats               Organization member statistics
-GET    /api/v1/members/:id                 Member detail (with accounts + docs)
-PUT    /api/v1/members/:id                 Update member
-PATCH  /api/v1/members/:id/activate        Activate pending member
-PATCH  /api/v1/members/:id/suspend         Suspend member
-POST   /api/v1/members/:id/next-of-kin     Add next of kin
-POST   /api/v1/members/:id/documents       Upload document (multipart)
-GET    /api/v1/members/:id/statement       Account statement (date range)
+GET    /api/v1/members                    # List members
+POST   /api/v1/members                    # Register member
+GET    /api/v1/members/:id                # Get member details
+PATCH  /api/v1/members/:id                # Update member
+DELETE /api/v1/members/:id                # Delete member
+PATCH  /api/v1/members/:id/activate       # Activate member
+POST   /api/v1/members/self-register      # Member self-registration
 ```
 
 ### Savings
 ```
-GET    /api/v1/savings/accounts                         List all accounts
-POST   /api/v1/savings/accounts                         Open new account
-GET    /api/v1/savings/accounts/:id                     Account details
-GET    /api/v1/savings/accounts/:id/transactions        Account transactions
-GET    /api/v1/savings/members/:memberId/accounts       Member's accounts
-POST   /api/v1/savings/deposit                          Process deposit
-POST   /api/v1/savings/withdraw                         Process withdrawal
-POST   /api/v1/savings/transfer                         Transfer between accounts
-GET    /api/v1/savings/transactions                     All transactions
-POST   /api/v1/savings/transactions/:id/reverse         Reverse transaction
+GET    /api/v1/savings/accounts           # List savings accounts
+POST   /api/v1/savings/accounts           # Create savings account
+POST   /api/v1/savings/deposit            # Process deposit
+POST   /api/v1/savings/withdraw           # Process withdrawal
+GET    /api/v1/savings/transactions       # Transaction history
+GET    /api/v1/savings/accounts/:id       # Account details
+```
+
+### Loans
+```
+GET    /api/v1/loans                      # List loans
+POST   /api/v1/loans/apply                # Apply for loan
+PATCH  /api/v1/loans/:id/approve          # Approve loan
+PATCH  /api/v1/loans/:id/reject           # Reject loan
+PATCH  /api/v1/loans/:id/disburse         # Disburse loan
+POST   /api/v1/loans/:id/repay            # Loan repayment
+GET    /api/v1/loans/:id/schedule         # Repayment schedule
+POST   /api/v1/loans/:id/guarantors       # Add guarantor
+GET    /api/v1/loans/guarantors           # List guarantors
+```
+
+### Dashboard
+```
+GET    /api/v1/dashboard/admin/stats      # Admin statistics
+GET    /api/v1/dashboard/member/stats     # Member statistics
+GET    /api/v1/dashboard/admin/transactions
+GET    /api/v1/dashboard/member/transactions
+GET    /api/v1/dashboard/charts/savings-growth
+GET    /api/v1/dashboard/charts/member-growth
+```
+
+### Reports
+```
+GET    /api/v1/reports/members            # Members report
+GET    /api/v1/reports/savings            # Savings report
+GET    /api/v1/reports/loans              # Loans report
+GET    /api/v1/reports/transactions       # Transactions report
+GET    /api/v1/reports/financial          # Financial report
+GET    /api/v1/reports/statement/:memberId # Member statement
+```
+
+### Notifications
+```
+GET    /api/v1/notifications              # List notifications
+GET    /api/v1/notifications/unread-count
+PATCH  /api/v1/notifications/:id/read
+PATCH  /api/v1/notifications/read-all
+POST   /api/v1/notifications              # Send notification (Admin)
 ```
 
 ### Branches
 ```
-GET    /api/v1/branches                    List branches
-POST   /api/v1/branches                    Create branch
-GET    /api/v1/branches/:id                Branch details
-PUT    /api/v1/branches/:id                Update branch
-DELETE /api/v1/branches/:id                Delete branch
-GET    /api/v1/branches/:id/stats          Branch statistics
-PATCH  /api/v1/branches/:id/assign-manager Assign manager
+GET    /api/v1/branches                   # List branches
+POST   /api/v1/branches                   # Create branch
+PATCH  /api/v1/branches/:id               # Update branch
+DELETE /api/v1/branches/:id               # Delete branch
 ```
 
----
+Full API documentation available at `/api-docs`
 
-## Security
-
-- **JWT access tokens** (30 min) + **refresh tokens** (7 days) stored in Redis
-- **Token blacklisting** on logout via Redis
-- **Account lockout** after 5 failed login attempts (configurable)
-- **Refresh token rotation** — old token revoked on each refresh
-- **Multi-tenant isolation** — every query is org-scoped via `tenantIsolation` middleware
-- **Role-based access control** via `authorize(...roles)` middleware
-- **Permission-based authorization** via `requirePermission(permission)` middleware
-- **Helmet** (security headers), **hpp** (parameter pollution), **rate limiting**
-- **Input validation** via Joi on every write endpoint
-- **Audit logging** on all sensitive actions
-
----
-
-## Real-time (Socket.IO)
-
-Connect with a JWT access token:
-```js
-const socket = io('http://localhost:5000', {
-  auth: { token: '<access_token>' }
-});
-
-// Listen for events
-socket.on('notification:new', (data) => console.log('New notification:', data));
-socket.on('transaction:completed', (data) => console.log('Transaction:', data));
-socket.on('loan:approved', (data) => console.log('Loan approved:', data));
-```
-
-Users automatically join rooms: `user:{id}`, `org:{orgId}`, `branch:{branchId}`
-
----
-
-## Background Jobs (BullMQ)
-
-| Job | Schedule | Description |
-|---|---|---|
-| Interest Accrual | 1st of month, 00:05 | Credits monthly savings interest to all active accounts |
-| Loan Penalty Check | Daily, 01:00 | Marks overdue loan repayments |
-| Loan Reminders | Daily, 08:00 | Sends notifications for repayments due in 3 days |
-| Dashboard Cache | Daily, 06:00 | Pre-computes org statistics into Redis |
-| Monthly Statements | 1st of month, 00:30 | Queues statement notifications for all active members |
-
----
-
-## Database Schema
-
-```
-organizations ─┬─< branches ─┬─< users
-               │              └─< members ─┬─< savings_accounts ─< savings_transactions
-               │                           ├─< loans ─┬─< loan_repayments
-               │                           │           └─< guarantors
-               │                           ├─< next_of_kin
-               │                           └─< member_documents
-               ├─< roles ─< role_permissions ─< permissions
-               ├─< loan_products
-               ├─< chart_of_accounts ─< journal_lines
-               ├─< journal_entries ─< journal_lines
-               ├─< audit_logs
-               ├─< notifications
-               └─< mpesa_transactions
-```
-
----
-
-## Running Tests
+## 🧪 Testing
 
 ```bash
-npm test                    # All tests
-npm run test:coverage       # With coverage report
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
-Test suite includes:
-- **Unit tests** — AuthService (login/lockout/password), SavingsService (deposit/withdrawal/transfer/interest), MemberService (registration/activation), Utility helpers
-- **Integration tests** — Joi schema validation for all API inputs (auth, members, savings, branches)
+## 🚀 Deployment
 
-Target coverage: 90%+
+### Production Checklist
+- [ ] Change all default passwords
+- [ ] Update JWT secrets in `.env`
+- [ ] Configure production database
+- [ ] Set up SSL/TLS certificates
+- [ ] Configure email SMTP settings
+- [ ] Set up SMS provider (if using)
+- [ ] Configure Redis for production
+- [ ] Set `NODE_ENV=production`
+- [ ] Enable error tracking (Sentry, etc.)
+- [ ] Set up backup strategy
+- [ ] Configure firewall rules
+- [ ] Set up monitoring (PM2, New Relic, etc.)
 
----
-
-## Environment Variables
-
-See `.env.example` for the full list. Key variables:
-
-| Variable | Description |
-|---|---|
-| `DJANGO_SECRET_KEY` → `JWT_ACCESS_SECRET` | JWT signing secret |
-| `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | MySQL connection |
-| `REDIS_HOST`, `REDIS_PORT` | Redis connection |
-| `SMTP_*` | Email (SMTP) credentials |
-| `MPESA_*` | Safaricom Daraja API credentials |
-| `MAX_LOGIN_ATTEMPTS` | Before account lockout (default: 5) |
-| `LOCKOUT_DURATION_MINUTES` | Lockout duration (default: 30) |
-
----
-
-## Project Structure
-
+### Using PM2 (Recommended)
+```bash
+npm install -g pm2
+pm2 start src/server.js --name sacco-backend
+pm2 save
+pm2 startup
 ```
-src/
-├── config/         database.js, redis.js, swagger.js, sequelize.cjs
-├── constants/      roles, permissions, transaction types, cache TTLs
-├── controllers/    one controller per module (thin — delegates to services)
-├── jobs/           scheduledJobs.js (node-cron)
-├── middlewares/    auth.js, validate.js, errorHandler.js, auditLog.js
-├── migrations/     ordered DB migrations (01→07)
-├── models/         Sequelize models + central index.js with all associations
-├── queues/         BullMQ queues + workers (email, notification, interest)
-├── repositories/   BaseRepository + feature repos (auth, org, member, savings)
-├── routes/         Express routers with Swagger JSDoc
-├── seeders/        Demo data (roles, org, members, loan products, CoA)
-├── services/       authService, memberService, savingsService, branchService,
-│                   organizationService, emailService, tokenService
-├── socket/         Socket.IO auth + room management + event emitters
-├── tests/
-│   ├── unit/       authService, savingsService, memberService, utils
-│   └── integration/ auth endpoints, member+savings validators, testHelpers
-├── uploads/        local file storage (documents, photos)
-├── utils/          logger.js, helpers.js, errors.js, response.js
-├── validators/     Joi schemas for all modules
-├── app.js          Express factory (middleware stack)
-└── server.js       HTTP + Socket.IO bootstrap + graceful shutdown
+
+## 🐛 Troubleshooting
+
+### Redis BullMQ Errors
+If you see Redis version errors with BullMQ:
+- Upgrade Redis to 5.0+ for full BullMQ support
+- Or disable background jobs (system works fine without them)
+- Core features (auth, members, savings, loans) work with Redis 3.0+
+
+### Database Connection Issues
+```bash
+# Test MySQL connection
+mysql -u sacco_user -p sacco_management_system
+
+# Check if migrations ran
+npx sequelize-cli db:migrate:status
 ```
+
+### Port Already in Use
+```bash
+# Change PORT in .env file or kill existing process
+# Windows
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -i :5000
+kill -9 <PID>
+```
+
+## 📝 License
+
+Copyright © 2026 Amana SACCO. All rights reserved.
+
+## 👥 Support
+
+For issues and questions:
+- GitHub Issues: https://github.com/achaekevin/Sacco-Management-Platform/issues
+- Email: support@amanasacco.com
+
+## 🙏 Acknowledgments
+
+Built with ❤️ for SACCO organizations across Kenya.

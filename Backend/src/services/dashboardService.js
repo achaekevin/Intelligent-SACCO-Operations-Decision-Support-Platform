@@ -324,6 +324,135 @@ class DashboardService {
 
     return results;
   }
+
+  async getTellerStats(organizationId, userId) {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Total deposits today
+    const [[depositsResult]] = await sequelize.query(
+      `SELECT SUM(amount) as total, COUNT(*) as count FROM savings_transactions 
+       WHERE organizationId = ? AND type = 'deposit' 
+       AND status = 'completed' AND createdAt >= ?`,
+      { replacements: [organizationId, startOfDay] }
+    );
+    const totalDepositsToday = parseFloat(depositsResult?.total || 0);
+    const depositCount = parseInt(depositsResult?.count || 0);
+
+    // Total withdrawals today
+    const [[withdrawalsResult]] = await sequelize.query(
+      `SELECT SUM(amount) as total, COUNT(*) as count FROM savings_transactions 
+       WHERE organizationId = ? AND type = 'withdrawal' 
+       AND status = 'completed' AND createdAt >= ?`,
+      { replacements: [organizationId, startOfDay] }
+    );
+    const totalWithdrawalsToday = parseFloat(withdrawalsResult?.total || 0);
+    const withdrawalCount = parseInt(withdrawalsResult?.count || 0);
+
+    // Total transactions today
+    const totalTransactionsToday = depositCount + withdrawalCount;
+
+    // Cash in hand (deposits - withdrawals today)
+    const cashInHand = totalDepositsToday - totalWithdrawalsToday;
+
+    // Pending transactions
+    const [[pendingResult]] = await sequelize.query(
+      `SELECT COUNT(*) as count FROM savings_transactions 
+       WHERE organizationId = ? AND status = 'pending' AND createdAt >= ?`,
+      { replacements: [organizationId, startOfDay] }
+    );
+    const pendingTransactions = parseInt(pendingResult?.count || 0);
+
+    // Active members served today (unique members with transactions)
+    const [[membersResult]] = await sequelize.query(
+      `SELECT COUNT(DISTINCT memberId) as count FROM savings_transactions 
+       WHERE organizationId = ? AND createdAt >= ?`,
+      { replacements: [organizationId, startOfDay] }
+    );
+    const activeMembersServed = parseInt(membersResult?.count || 0);
+
+    // M-Pesa collections today
+    const [[mpesaResult]] = await sequelize.query(
+      `SELECT SUM(amount) as total, COUNT(*) as count FROM savings_transactions 
+       WHERE organizationId = ? AND type = 'deposit' 
+       AND paymentMethod = 'mpesa' AND status = 'completed' AND createdAt >= ?`,
+      { replacements: [organizationId, startOfDay] }
+    );
+    const mpesaCollections = parseFloat(mpesaResult?.total || 0);
+    const mpesaCount = parseInt(mpesaResult?.count || 0);
+
+    // Calculate opening balance (yesterday's closing balance)
+    const startOfYesterday = new Date(startOfDay);
+    startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+    
+    const [[yesterdayDeposits]] = await sequelize.query(
+      `SELECT SUM(amount) as total FROM savings_transactions 
+       WHERE organizationId = ? AND type = 'deposit' 
+       AND status = 'completed' AND createdAt >= ? AND createdAt < ?`,
+      { replacements: [organizationId, startOfYesterday, startOfDay] }
+    );
+    
+    const [[yesterdayWithdrawals]] = await sequelize.query(
+      `SELECT SUM(amount) as total FROM savings_transactions 
+       WHERE organizationId = ? AND type = 'withdrawal' 
+       AND status = 'completed' AND createdAt >= ? AND createdAt < ?`,
+      { replacements: [organizationId, startOfYesterday, startOfDay] }
+    );
+    
+    const openingBalance = parseFloat(yesterdayDeposits?.total || 0) - parseFloat(yesterdayWithdrawals?.total || 0);
+    const endOfDayBalance = openingBalance + cashInHand;
+
+    return {
+      totalDepositsToday,
+      depositCount,
+      totalWithdrawalsToday,
+      withdrawalCount,
+      totalTransactionsToday,
+      cashInHand,
+      pendingTransactions,
+      activeMembersServed,
+      mpesaCollections,
+      mpesaCount,
+      openingBalance,
+      endOfDayBalance,
+    };
+  }
+
+  async getTellerRecentTransactions(organizationId, limit = 10) {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const transactions = await SavingsTransaction.findAll({
+      where: { 
+        organizationId,
+        createdAt: { [Op.gte]: startOfDay }
+      },
+      include: [
+        {
+          model: Member,
+          as: 'member',
+          attributes: ['id', 'firstName', 'lastName', 'memberNumber'],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+      limit,
+    });
+
+    return transactions.map(tx => ({
+      id: tx.id,
+      reference: tx.reference,
+      type: tx.type,
+      amount: tx.amount,
+      status: tx.status,
+      paymentMethod: tx.paymentMethod,
+      date: tx.createdAt,
+      member: tx.member ? {
+        id: tx.member.id,
+        name: `${tx.member.firstName} ${tx.member.lastName}`,
+        memberNumber: tx.member.memberNumber,
+      } : null,
+    }));
+  }
 }
 
 export default new DashboardService();

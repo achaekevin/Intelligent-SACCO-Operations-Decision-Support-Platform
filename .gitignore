@@ -1,148 +1,70 @@
-# ─────────────────────────────────────────────────────────────────
-# Sensitive Files - NEVER COMMIT
-# ─────────────────────────────────────────────────────────────────
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
 .env
 .env.local
-.env.development
-.env.test
 .env.production
-*.pem
-*.key
-*.cert
+.env.*.local
 
-# Claude AI files
-.claude/
-*.claude
-
-# Secrets and credentials
-secrets/
-credentials/
-*.secret
-*.credential
-
-# ─────────────────────────────────────────────────────────────────
-# Dependencies
-# ─────────────────────────────────────────────────────────────────
-node_modules/
-jspm_packages/
-bower_components/
-vendor/
-
-# ─────────────────────────────────────────────────────────────────
-# Logs
-# ─────────────────────────────────────────────────────────────────
-logs/
+# Build outputs
+dist/
+build/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-pnpm-debug.log*
-
-# ─────────────────────────────────────────────────────────────────
-# Runtime data
-# ─────────────────────────────────────────────────────────────────
-pids/
+logs/
 *.pid
 *.seed
-*.pid.lock
 
-# ─────────────────────────────────────────────────────────────────
-# Build outputs
-# ─────────────────────────────────────────────────────────────────
-dist/
-dist-ssr/
-build/
-.next/
-out/
-.nuxt/
-.cache/
-.parcel-cache/
-.vite-temp/
-
-# ─────────────────────────────────────────────────────────────────
-# Testing
-# ─────────────────────────────────────────────────────────────────
-coverage/
-.nyc_output/
-*.lcov
-.grunt/
-lib-cov/
-
-# ─────────────────────────────────────────────────────────────────
-# Uploads and user data
-# ─────────────────────────────────────────────────────────────────
-Backend/src/uploads/
-uploads/
-temp/
-tmp/
-
-# ─────────────────────────────────────────────────────────────────
-# Database
-# ─────────────────────────────────────────────────────────────────
-*.sql
-*.sqlite
-*.sqlite3
-*.db
-
-# ─────────────────────────────────────────────────────────────────
-# OS files
-# ─────────────────────────────────────────────────────────────────
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-desktop.ini
-$RECYCLE.BIN/
 
-# ─────────────────────────────────────────────────────────────────
-# IDE & Editor files
-# ─────────────────────────────────────────────────────────────────
-.idea/
+# IDEs
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
-.project
-.classpath
-.settings/
-*.sublime-project
-*.sublime-workspace
 
-# ─────────────────────────────────────────────────────────────────
-# Package manager files
-# ─────────────────────────────────────────────────────────────────
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-.pnpm-debug.log
+# Test coverage
+coverage/
 
-# ─────────────────────────────────────────────────────────────────
-# Optional npm cache directory
-# ─────────────────────────────────────────────────────────────────
-.npm
-.eslintcache
-.stylelintcache
-.node_repl_history
+# Uploads
+Backend/src/uploads/*
+!Backend/src/uploads/.gitkeep
 
-# ─────────────────────────────────────────────────────────────────
-# Docker
-# ─────────────────────────────────────────────────────────────────
-docker-compose.override.yml
+# Database
+*.sql
+*.sqlite
+*.db
 
-# ─────────────────────────────────────────────────────────────────
-# Backup files
-# ─────────────────────────────────────────────────────────────────
-*.backup
-*.bak
-*.old
-*.orig
+# Redis
+dump.rdb
 
-# ─────────────────────────────────────────────────────────────────
-# PowerShell scripts (temporary fix scripts)
-# ─────────────────────────────────────────────────────────────────
-Backend/fix-migrations.ps1
-Backend/setup-db.sql
+# PM2
+.pm2/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Backend specific
+Backend/.env
+Backend/logs/*.log
+Backend/uploads/
+
+# Frontend specific
+Frontend/.env
+Frontend/dist/
+Frontend/.vite/
+
+# Test email script (contains sensitive data)
+Backend/test-email.js

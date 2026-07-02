@@ -26,6 +26,15 @@ export const formatDateTime = (dateStr) => {
   }).format(d)
 }
 
+export const formatTime = (dateStr) => {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  if (Number.isNaN(d.getTime())) return dateStr
+  return new Intl.DateTimeFormat('en-KE', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).format(d)
+}
+
 export const initials = (name = '') =>
   name
     .split(' ')

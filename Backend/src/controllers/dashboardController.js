@@ -81,6 +81,33 @@ class DashboardController {
       next(err);
     }
   }
+
+  // Teller Dashboard Stats
+  async getTellerStats(req, res, next) {
+    try {
+      const stats = await dashboardService.getTellerStats(
+        req.user.organizationId,
+        req.user.id
+      );
+      return successResponse(res, { data: stats });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Teller Recent Transactions (Today only)
+  async getTellerTransactions(req, res, next) {
+    try {
+      const { limit = 10 } = req.query;
+      const transactions = await dashboardService.getTellerRecentTransactions(
+        req.user.organizationId,
+        parseInt(limit)
+      );
+      return successResponse(res, { data: transactions });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 export default new DashboardController();

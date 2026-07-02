@@ -72,4 +72,24 @@ router.get('/charts/savings-growth', dashboardController.getSavingsGrowth);
  */
 router.get('/charts/member-growth', dashboardController.getMemberGrowth);
 
+/**
+ * @swagger
+ * /dashboard/teller/stats:
+ *   get:
+ *     summary: Get teller dashboard statistics (today only)
+ *     tags: [Dashboard]
+ *     security: [{ bearerAuth: [] }]
+ */
+router.get('/teller/stats', dashboardController.getTellerStats);
+
+/**
+ * @swagger
+ * /dashboard/teller/transactions:
+ *   get:
+ *     summary: Get teller recent transactions (today only)
+ *     tags: [Dashboard]
+ *     security: [{ bearerAuth: [] }]
+ */
+router.get('/teller/transactions', dashboardController.getTellerTransactions);
+
 export default router;
