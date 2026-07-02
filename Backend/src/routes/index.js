@@ -12,6 +12,7 @@ import mpesaRoutes from './mpesaRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
 import dashboardRoutes from './dashboardRoutes.js';
+import tellerRoutes from './tellerRoutes.js';
 
 const router = Router();
 
@@ -38,5 +39,6 @@ router.use('/mpesa',         mpesaRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/audit-logs',    auditLogRoutes);
 router.use('/dashboard',     dashboardRoutes);
+router.use('/teller',        tellerRoutes);
 
 export default router;

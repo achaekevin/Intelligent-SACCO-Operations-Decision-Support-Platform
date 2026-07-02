@@ -4,14 +4,20 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import {
   Wallet, TrendingUp, TrendingDown, Clock, Users, 
-  Smartphone, DollarSign, RefreshCcw
+  Smartphone, DollarSign, RefreshCcw, FileText, Target,
+  BarChart3, Download
 } from 'lucide-react';
 import PageHeader from '../../components/common/PageHeader';
 import StatCard from '../../components/cards/StatCard';
 import { SkeletonCard } from '../../components/loaders/Skeleton';
 import DataTable from '../../components/tables/DataTable';
+import Button from '../../components/common/Button';
+import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
 import { formatKES, formatNumber, formatDate, formatTime } from '../../utils/format';
+import CashCountingModal from './CashCountingModal';
+import TargetsCard from './TargetsCard';
+import TransactionReviewModal from './TransactionReviewModal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -22,6 +28,10 @@ const TellerDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [targets, setTargets] = useState(null);
+  const [showCashCounting, setShowCashCounting] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -38,16 +48,18 @@ const TellerDashboard = () => {
       const token = localStorage.getItem('accessToken');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [statsRes, txRes] = await Promise.all([
+      const [statsRes, txRes, targetsRes] = await Promise.all([
         axios.get(`${API_URL}/dashboard/teller/stats`, { headers }).catch(err => {
           console.error('Teller stats error:', err.response?.data || err.message);
           return { data: { data: null } };
         }),
         axios.get(`${API_URL}/dashboard/teller/transactions?limit=10`, { headers }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/teller/daily-targets`, { headers }).catch(() => ({ data: { data: null } })),
       ]);
 
       setStats(statsRes.data.data);
       setTransactions(txRes.data.data || []);
+      setTargets(targetsRes.data.data);
       
       if (!statsRes.data.data) {
         toast.error('Failed to load statistics. Please check your connection.');
@@ -66,6 +78,40 @@ const TellerDashboard = () => {
   };
 
   const handleRefresh = () => {
+    fetchDashboardData(true);
+  };
+
+  const handleDownloadEODReport = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/teller/end-of-day-report/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `eod-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      toast.success('End of Day Report downloaded');
+    } catch (error) {
+      console.error('Failed to download report:', error);
+      toast.error('Failed to download report');
+    }
+  };
+
+  const handleReviewTransaction = (tx) => {
+    setSelectedTransaction(tx);
+    setShowReview(true);
+  };
+
+  const handleReviewComplete = () => {
+    setShowReview(false);
+    setSelectedTransaction(null);
     fetchDashboardData(true);
   };
 
@@ -129,6 +175,18 @@ const TellerDashboard = () => {
         </span>
       )
     },
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (r) => r.status === 'pending' ? (
+        <button
+          onClick={() => handleReviewTransaction(r)}
+          className="text-teal-600 hover:text-teal-700 text-sm font-medium"
+        >
+          Review
+        </button>
+      ) : null
+    }
   ];
 
   return (
@@ -138,15 +196,27 @@ const TellerDashboard = () => {
           title={`Teller Dashboard - ${user?.firstName || 'Welcome'}`}
           subtitle={`Today's transactions as of ${formatTime(new Date())}`}
         />
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
-        >
-          <RefreshCcw size={18} className={refreshing ? 'animate-spin' : ''} />
-          Refresh
-        </button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleDownloadEODReport}
+            variant="outline"
+            icon={Download}
+          >
+            EOD Report
+          </Button>
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            icon={RefreshCcw}
+            className={refreshing ? 'animate-spin' : ''}
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
+
+      {/* Daily Targets Card */}
+      {targets && <TargetsCard targets={targets} />}
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
@@ -225,7 +295,7 @@ const TellerDashboard = () => {
       </div>
 
       {/* Today's Transactions Table */}
-      <div className="bg-white dark:bg-ink-800 rounded-lg shadow-sm border border-ink-200 dark:border-ink-700">
+      <Card className="mb-6">
         <div className="p-4 sm:p-6 border-b border-ink-200 dark:border-ink-700">
           <h2 className="text-lg font-semibold text-ink-800 dark:text-ink-100">
             Today's Transactions
@@ -241,7 +311,6 @@ const TellerDashboard = () => {
             <DataTable
               columns={txColumns}
               data={transactions}
-              onRowClick={(tx) => navigate(`/transactions/${tx.id}`)}
             />
           ) : (
             <div className="p-6 text-center text-ink-500">
@@ -249,10 +318,10 @@ const TellerDashboard = () => {
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Quick Actions */}
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <button
           onClick={() => navigate('/savings/deposit')}
           className="p-4 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
@@ -268,11 +337,18 @@ const TellerDashboard = () => {
           <div className="font-semibold text-orange-900 dark:text-orange-100">New Withdrawal</div>
         </button>
         <button
-          onClick={() => navigate('/members')}
+          onClick={() => setShowCashCounting(true)}
+          className="p-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+        >
+          <Wallet className="text-purple-600 mb-2" size={24} />
+          <div className="font-semibold text-purple-900 dark:text-purple-100">Cash Counting</div>
+        </button>
+        <button
+          onClick={() => navigate('/teller/performance')}
           className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
         >
-          <Users className="text-blue-600 mb-2" size={24} />
-          <div className="font-semibold text-blue-900 dark:text-blue-100">View Members</div>
+          <BarChart3 className="text-blue-600 mb-2" size={24} />
+          <div className="font-semibold text-blue-900 dark:text-blue-100">Performance</div>
         </button>
         <button
           onClick={handleRefresh}
@@ -282,6 +358,26 @@ const TellerDashboard = () => {
           <div className="font-semibold text-teal-900 dark:text-teal-100">Refresh Data</div>
         </button>
       </div>
+
+      {/* Modals */}
+      {showCashCounting && (
+        <CashCountingModal
+          onClose={() => setShowCashCounting(false)}
+          onSubmit={() => {
+            setShowCashCounting(false);
+            toast.success('Cash counting submitted');
+          }}
+          expectedCash={stats?.cashInHand || 0}
+        />
+      )}
+
+      {showReview && selectedTransaction && (
+        <TransactionReviewModal
+          transaction={selectedTransaction}
+          onClose={() => setShowReview(false)}
+          onComplete={handleReviewComplete}
+        />
+      )}
     </div>
   );
 };
