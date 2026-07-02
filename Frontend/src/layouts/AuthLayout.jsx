@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Landmark, ShieldCheck, TrendingUp, Users } from 'lucide-react'
+import Footer from '../components/common/Footer'
 
 const AuthLayout = () => {
   const { theme } = useSelector((s) => s.ui)
@@ -13,7 +14,12 @@ const AuthLayout = () => {
   if (isLoginPage) {
     return (
       <div className={theme === 'dark' ? 'dark' : ''}>
-        <Outlet />
+        <div className="min-h-screen flex flex-col">
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <Footer />
+        </div>
         <ToastContainer position="top-right" autoClose={3500} theme={theme} />
       </div>
     )
@@ -60,12 +66,22 @@ const AuthLayout = () => {
             </div>
           </div>
 
-          <p className="relative text-xs text-ink-400 animate-fade-in-up delay-500">© 2026 Amana SACCO. All rights reserved.</p>
+          <div className="relative animate-fade-in-up delay-500">
+            <p className="text-xs text-ink-400">© 2026 Amana SACCO. All rights reserved.</p>
+            <p className="text-xs text-ink-500 mt-1">
+              Designed by <span className="text-gold-400 font-semibold">Kevin Achae</span>
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center justify-center p-6 sm:p-10">
-          <div className="w-full max-w-sm">
-            <Outlet />
+        <div className="flex flex-col min-h-screen lg:min-h-0">
+          <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
+            <div className="w-full max-w-sm">
+              <Outlet />
+            </div>
+          </div>
+          <div className="lg:hidden">
+            <Footer />
           </div>
         </div>
       </div>
