@@ -77,6 +77,9 @@ import NotificationSettings from './pages/settings/NotificationSettings'
 // Profile
 import Profile from './pages/profile/Profile'
 
+// Teller
+import TellerPerformance from './pages/teller/Performance'
+
 // Member portal
 import MemberOverview from './pages/member-portal/MemberOverview'
 import MemberSavings from './pages/member-portal/MemberSavings'
@@ -155,6 +158,8 @@ function App() {
         <Route path="/settings/interest-rates" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.settings}><InterestRates /></ProtectedRoute>} />
         <Route path="/settings/branches" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.settings}><BranchSettings /></ProtectedRoute>} />
         <Route path="/settings/notifications" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.settings}><NotificationSettings /></ProtectedRoute>} />
+
+        <Route path="/teller/performance" element={<ProtectedRoute allowedRoles={['cashier', 'sacco_admin']}><TellerPerformance /></ProtectedRoute>} />
 
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/change-password" element={<ChangePassword />} />
