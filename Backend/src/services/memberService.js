@@ -457,6 +457,283 @@ class MemberService {
   async getStats(organizationId) {
     return memberRepository.getStats(organizationId);
   }
+
+  async search(organizationId, query) {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+
+    const { Op } = await import('sequelize');
+    const searchTerm = query.trim();
+
+    // Search across multiple fields
+    const members = await Member.findAll({
+      where: {
+        organizationId,
+        [Op.or]: [
+          { memberNumber: { [Op.like]: `%${searchTerm}%` } },
+          { nationalId: { [Op.like]: `%${searchTerm}%` } },
+          { phone: { [Op.like]: `%${searchTerm}%` } },
+          { firstName: { [Op.like]: `%${searchTerm}%` } },
+          { lastName: { [Op.like]: `%${searchTerm}%` } },
+          { email: { [Op.like]: `%${searchTerm}%` } },
+          sequelize.where(
+            sequelize.fn('CONCAT', sequelize.col('firstName'), ' ', sequelize.col('lastName')),
+            { [Op.like]: `%${searchTerm}%` }
+          ),
+        ],
+      },
+      include: [
+        {
+          model: Branch,
+          as: 'branch',
+          attributes: ['id', 'name'],
+        },
+      ],
+      attributes: [
+        'id',
+        'memberNumber',
+        'firstName',
+        'lastName',
+        'email',
+        'phone',
+        'nationalId',
+        'status',
+        'profilePicture',
+      ],
+      limit: 20,
+      order: [
+        ['status', 'DESC'], // Active members first
+        ['firstName', 'ASC'],
+      ],
+    });
+
+    // Also search in savings accounts by account number
+    const accountMatches = await SavingsAccount.findAll({
+      where: {
+        organizationId,
+        accountNumber: { [Op.like]: `%${searchTerm}%` },
+      },
+      include: [
+        {
+          model: Member,
+          as: 'member',
+          attributes: [
+            'id',
+            'memberNumber',
+            'firstName',
+            'lastName',
+            'email',
+            'phone',
+            'nationalId',
+            'status',
+            'profilePicture',
+          ],
+          include: [
+            {
+              model: Branch,
+              as: 'branch',
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
+      ],
+      limit: 10,
+    });
+
+    // Combine results and remove duplicates
+    const memberMap = new Map();
+    
+    members.forEach((m) => {
+      memberMap.set(m.id, {
+        id: m.id,
+        memberNumber: m.memberNumber,
+        firstName: m.firstName,
+        lastName: m.lastName,
+        fullName: `${m.firstName} ${m.lastName}`,
+        email: m.email,
+        phone: m.phone,
+        nationalId: m.nationalId,
+        status: m.status,
+        profilePicture: m.profilePicture,
+        branch: m.branch,
+      });
+    });
+
+    accountMatches.forEach((a) => {
+      if (a.member && !memberMap.has(a.member.id)) {
+        memberMap.set(a.member.id, {
+          id: a.member.id,
+          memberNumber: a.member.memberNumber,
+          firstName: a.member.firstName,
+          lastName: a.member.lastName,
+          fullName: `${a.member.firstName} ${a.member.lastName}`,
+          email: a.member.email,
+          phone: a.member.phone,
+          nationalId: a.member.nationalId,
+          status: a.member.status,
+          profilePicture: a.member.profilePicture,
+          branch: a.member.branch,
+          matchedAccount: a.accountNumber,
+        });
+      }
+    });
+
+    return Array.from(memberMap.values());
+  }
+
+  async getFullProfile(memberId, organizationId) {
+    const { SavingsTransaction } = await import('../models/index.js');
+    const { Op } = await import('sequelize');
+
+    // Get member with all details
+    const member = await Member.findOne({
+      where: { id: memberId, organizationId },
+      include: [
+        {
+          model: Branch,
+          as: 'branch',
+          attributes: ['id', 'name', 'code'],
+        },
+        {
+          model: NextOfKin,
+          as: 'nextOfKin',
+        },
+      ],
+    });
+
+    if (!member) {
+      throw new NotFoundError('Member not found.');
+    }
+
+    // Get all savings accounts with balances
+    const accounts = await SavingsAccount.findAll({
+      where: { memberId, organizationId },
+      attributes: [
+        'id',
+        'accountNumber',
+        'accountType',
+        'balance',
+        'status',
+        'interestRate',
+        'minimumBalance',
+      ],
+      order: [['accountType', 'ASC']],
+    });
+
+    // Calculate total savings and share capital
+    const ordinaryAccount = accounts.find((a) => a.accountType === SAVINGS_ACCOUNT_TYPES.ORDINARY);
+    const shareCapitalAccount = accounts.find((a) => a.accountType === SAVINGS_ACCOUNT_TYPES.SHARE_CAPITAL);
+    
+    const savingsBalance = ordinaryAccount ? parseFloat(ordinaryAccount.balance) : 0;
+    const shareCapital = shareCapitalAccount ? parseFloat(shareCapitalAccount.balance) : 0;
+
+    // Get loans with arrears
+    const loans = await Loan.findAll({
+      where: { memberId, organizationId },
+      attributes: [
+        'id',
+        'loanNumber',
+        'loanType',
+        'principalAmount',
+        'outstandingBalance',
+        'status',
+        'disbursementDate',
+        'maturityDate',
+        'interestRate',
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+
+    // Calculate active loans and arrears
+    const activeLoans = loans.filter((l) => l.status === 'disbursed');
+    const totalLoanBalance = activeLoans.reduce(
+      (sum, l) => sum + parseFloat(l.outstandingBalance),
+      0
+    );
+
+    // Calculate arrears (simplified - loans past maturity date)
+    const now = new Date();
+    const loanArrears = activeLoans
+      .filter((l) => l.maturityDate && new Date(l.maturityDate) < now)
+      .reduce((sum, l) => sum + parseFloat(l.outstandingBalance), 0);
+
+    // Get recent transactions (last 10)
+    const accountIds = accounts.map((a) => a.id);
+    const recentTransactions = await SavingsTransaction.findAll({
+      where: {
+        savingsAccountId: { [Op.in]: accountIds },
+      },
+      include: [
+        {
+          model: SavingsAccount,
+          as: 'account',
+          attributes: ['accountNumber', 'accountType'],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 10,
+    });
+
+    return {
+      member: {
+        id: member.id,
+        memberNumber: member.memberNumber,
+        firstName: member.firstName,
+        lastName: member.lastName,
+        fullName: `${member.firstName} ${member.lastName}`,
+        email: member.email,
+        phone: member.phone,
+        nationalId: member.nationalId,
+        dateOfBirth: member.dateOfBirth,
+        gender: member.gender,
+        maritalStatus: member.maritalStatus,
+        occupation: member.occupation,
+        employer: member.employer,
+        address: member.address,
+        city: member.city,
+        county: member.county,
+        status: member.status,
+        profilePicture: member.profilePicture,
+        joiningDate: member.joiningDate,
+        branch: member.branch,
+        nextOfKin: member.nextOfKin,
+      },
+      accounts,
+      summary: {
+        savingsBalance,
+        shareCapital,
+        totalSavings: savingsBalance + shareCapital,
+        activeLoanCount: activeLoans.length,
+        totalLoanBalance,
+        loanArrears,
+      },
+      loans: loans.map((l) => ({
+        id: l.id,
+        loanNumber: l.loanNumber,
+        loanType: l.loanType,
+        principalAmount: parseFloat(l.principalAmount),
+        outstandingBalance: parseFloat(l.outstandingBalance),
+        status: l.status,
+        disbursementDate: l.disbursementDate,
+        maturityDate: l.maturityDate,
+        interestRate: l.interestRate,
+        isOverdue: l.maturityDate && new Date(l.maturityDate) < now,
+      })),
+      recentTransactions: recentTransactions.map((t) => ({
+        id: t.id,
+        reference: t.reference,
+        type: t.type,
+        amount: parseFloat(t.amount),
+        balance: parseFloat(t.balance),
+        status: t.status,
+        paymentMethod: t.paymentMethod,
+        description: t.description,
+        createdAt: t.createdAt,
+        account: t.account,
+      })),
+    };
+  }
 }
 
 export default new MemberService();

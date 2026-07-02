@@ -107,6 +107,32 @@ router.get('/stats', memberController.getStats);
 
 /**
  * @swagger
+ * /members/search:
+ *   get:
+ *     summary: Search members by number, ID, phone, name, or account number
+ *     tags: [Members]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema: { type: string }
+ *         description: Search query (member number, national ID, phone, name, or account number)
+ */
+router.get('/search', memberController.search);
+
+/**
+ * @swagger
+ * /members/{id}/profile:
+ *   get:
+ *     summary: Get full member profile with accounts, loans, and transactions
+ *     tags: [Members]
+ *     security: [{ bearerAuth: [] }]
+ */
+router.get('/:id/profile', memberController.getProfile);
+
+/**
+ * @swagger
  * /members:
  *   post:
  *     summary: Register a new member

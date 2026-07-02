@@ -24,6 +24,7 @@ import MemberList from './pages/members/MemberList'
 import RegisterMember from './pages/members/RegisterMember'
 import ViewMember from './pages/members/ViewMember'
 import EditMember from './pages/members/EditMember'
+import MemberSearch from './pages/members/MemberSearch'
 
 // Branches
 import BranchList from './pages/branches/BranchList'
@@ -115,6 +116,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
 
         <Route path="/members" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.members}><MemberList /></ProtectedRoute>} />
+        <Route path="/members/search" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.members}><MemberSearch /></ProtectedRoute>} />
         <Route path="/members/register" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.members}><RegisterMember /></ProtectedRoute>} />
         <Route path="/members/:id" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.members}><ViewMember /></ProtectedRoute>} />
         <Route path="/members/:id/edit" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.members}><EditMember /></ProtectedRoute>} />

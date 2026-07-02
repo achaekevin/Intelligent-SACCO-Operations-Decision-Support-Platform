@@ -103,6 +103,20 @@ class MemberController {
       return successResponse(res, { data: stats });
     } catch (err) { next(err); }
   }
+
+  async search(req, res, next) {
+    try {
+      const results = await memberService.search(req.user.organizationId, req.query.q);
+      return successResponse(res, { data: results });
+    } catch (err) { next(err); }
+  }
+
+  async getProfile(req, res, next) {
+    try {
+      const profile = await memberService.getFullProfile(req.params.id, req.user.organizationId);
+      return successResponse(res, { data: profile });
+    } catch (err) { next(err); }
+  }
 }
 
 export default new MemberController();
