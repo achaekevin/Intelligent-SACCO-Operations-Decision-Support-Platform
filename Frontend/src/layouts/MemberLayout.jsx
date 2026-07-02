@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useSessionTimeout } from '../hooks/useSessionTimeout'
 import { classNames, initials } from '../utils/format'
 import { useNavigate } from 'react-router-dom'
+import Footer from '../components/common/Footer'
 
 const MemberLayout = () => {
   const dispatch = useDispatch()
@@ -19,7 +20,7 @@ const MemberLayout = () => {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-cream dark:bg-ink-900">
+      <div className="min-h-screen bg-cream dark:bg-ink-900 flex flex-col">
         <header className="sticky top-0 z-20 bg-white/90 dark:bg-ink-800/90 backdrop-blur border-b border-ink-100 dark:border-ink-700">
           <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -60,9 +61,10 @@ const MemberLayout = () => {
             ))}
           </nav>
         </header>
-        <main className="max-w-5xl mx-auto px-4 py-6">
+        <main className="flex-1 max-w-5xl mx-auto px-4 py-6 w-full">
           <Outlet />
         </main>
+        <Footer />
       </div>
       <ToastContainer position="top-right" autoClose={3500} theme={theme} />
     </div>
