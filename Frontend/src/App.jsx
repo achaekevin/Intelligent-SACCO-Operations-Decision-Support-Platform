@@ -46,6 +46,7 @@ import LoanList from './pages/loans/LoanList'
 import LoanApplication from './pages/loans/LoanApplication'
 import LoanDetail from './pages/loans/LoanDetail'
 import GuarantorList from './pages/loans/GuarantorList'
+import LoanRepayment from './pages/loans/LoanRepayment'
 
 // Transactions
 import TransactionList from './pages/transactions/TransactionList'
@@ -137,6 +138,7 @@ function App() {
 
         <Route path="/loans" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.loans}><LoanList /></ProtectedRoute>} />
         <Route path="/loans/apply" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.loans}><LoanApplication /></ProtectedRoute>} />
+        <Route path="/loans/repayment" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.loans}><LoanRepayment /></ProtectedRoute>} />
         <Route path="/loans/guarantors" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.loans}><GuarantorList /></ProtectedRoute>} />
         <Route path="/loans/:id" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.loans}><LoanDetail /></ProtectedRoute>} />
 

@@ -39,5 +39,7 @@ router.patch('/:id/approve',    authorize(...approvers), validate(approveLoanSch
 router.patch('/:id/reject',     authorize(...approvers), validate(rejectLoanSchema), auditLog('reject', 'loan'), loanController.reject);
 router.patch('/:id/disburse',   authorize(...approvers), validate(disburseLoanSchema), auditLog('disburse', 'loan'), loanController.disburse);
 router.post('/:id/repay',       authorize(...cashiers), validate(repayLoanSchema), auditLog('deposit', 'loan'), loanController.repay);
+router.get('/:id/summary',      loanController.getLoanSummary);
+router.get('/repayments/:repaymentId/receipt', loanController.getRepaymentReceipt);
 
 export default router;

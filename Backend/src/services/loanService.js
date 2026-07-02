@@ -374,6 +374,215 @@ class LoanService {
     return { total, disbursed, pending, completed, defaulted, totalOutstanding: disbursedSum?.totalOutstanding || 0 };
   }
 
+  // ─── Loan Repayment Summary ──────────────────────────────────────
+  async getLoanRepaymentSummary(loanId, organizationId) {
+    const { User, Organization, Branch } = await import('../models/index.js');
+
+    const loan = await Loan.findOne({
+      where: { id: loanId, organizationId },
+      include: [
+        {
+          model: Member,
+          as: 'member',
+          attributes: ['id', 'firstName', 'lastName', 'memberNumber', 'phone', 'email'],
+        },
+        {
+          model: LoanProduct,
+          as: 'product',
+          attributes: ['name', 'type', 'penaltyRate'],
+        },
+      ],
+    });
+
+    if (!loan) {
+      throw new NotFoundError('Loan not found.');
+    }
+
+    if (loan.status !== LOAN_STATUSES.DISBURSED) {
+      throw new AppError('Only disbursed loans can accept repayments.', 400);
+    }
+
+    // Get next unpaid installment
+    const nextInstallment = await LoanRepayment.findOne({
+      where: { 
+        loanId, 
+        status: { [Op.in]: ['pending', 'partial', 'overdue'] } 
+      },
+      order: [['dueDate', 'ASC']],
+    });
+
+    // Calculate penalties for overdue payments
+    let totalPenalties = 0;
+    const today = new Date();
+    if (nextInstallment && new Date(nextInstallment.dueDate) < today) {
+      const daysOverdue = Math.floor((today - new Date(nextInstallment.dueDate)) / (1000 * 60 * 60 * 24));
+      const penaltyRate = loan.product?.penaltyRate || 0.05; // 5% default
+      totalPenalties = formatAmount(
+        parseFloat(nextInstallment.dueAmount - nextInstallment.amountPaid) * penaltyRate * (daysOverdue / 30)
+      );
+    }
+
+    // Get all unpaid installments
+    const unpaidInstallments = await LoanRepayment.findAll({
+      where: { 
+        loanId, 
+        status: { [Op.in]: ['pending', 'partial', 'overdue'] } 
+      },
+      order: [['dueDate', 'ASC']],
+    });
+
+    // Get recent repayments
+    const recentRepayments = await LoanRepayment.findAll({
+      where: { loanId, status: 'paid' },
+      order: [['paymentDate', 'DESC']],
+      limit: 5,
+    });
+
+    // Get organization and branch
+    const organization = await Organization.findByPk(organizationId);
+    const branch = await Branch.findByPk(loan.branchId);
+
+    return {
+      loan: {
+        id: loan.id,
+        loanNumber: loan.loanNumber,
+        type: loan.type,
+        principalAmount: parseFloat(loan.principalAmount),
+        totalRepayable: parseFloat(loan.totalRepayable),
+        monthlyInstallment: parseFloat(loan.monthlyInstallment),
+        principalBalance: parseFloat(loan.principalBalance),
+        interestBalance: parseFloat(loan.interestBalance),
+        penaltiesBalance: parseFloat(loan.penaltiesBalance) + totalPenalties,
+        totalPaid: parseFloat(loan.totalPaid),
+        totalOutstanding: parseFloat(loan.principalBalance) + parseFloat(loan.interestBalance) + totalPenalties,
+        disbursedAt: loan.disbursedAt,
+        firstRepaymentDate: loan.firstRepaymentDate,
+        termMonths: loan.termMonths,
+        interestRate: loan.interestRate,
+        status: loan.status,
+      },
+      member: {
+        id: loan.member.id,
+        name: `${loan.member.firstName} ${loan.member.lastName}`,
+        memberNumber: loan.member.memberNumber,
+        phone: loan.member.phone,
+        email: loan.member.email,
+      },
+      nextPayment: nextInstallment ? {
+        installmentNumber: nextInstallment.installmentNumber,
+        dueDate: nextInstallment.dueDate,
+        dueAmount: parseFloat(nextInstallment.dueAmount),
+        amountPaid: parseFloat(nextInstallment.amountPaid),
+        remaining: parseFloat(nextInstallment.dueAmount - nextInstallment.amountPaid),
+        principalDue: parseFloat(nextInstallment.principalDue),
+        interestDue: parseFloat(nextInstallment.interestDue),
+        penaltyDue: totalPenalties,
+        isOverdue: new Date(nextInstallment.dueDate) < today,
+        daysOverdue: new Date(nextInstallment.dueDate) < today 
+          ? Math.floor((today - new Date(nextInstallment.dueDate)) / (1000 * 60 * 60 * 24))
+          : 0,
+      } : null,
+      unpaidInstallments: unpaidInstallments.map(inst => ({
+        installmentNumber: inst.installmentNumber,
+        dueDate: inst.dueDate,
+        dueAmount: parseFloat(inst.dueAmount),
+        amountPaid: parseFloat(inst.amountPaid),
+        remaining: parseFloat(inst.dueAmount - inst.amountPaid),
+        status: inst.status,
+      })),
+      recentPayments: recentRepayments.map(rep => ({
+        installmentNumber: rep.installmentNumber,
+        paymentDate: rep.paymentDate,
+        amountPaid: parseFloat(rep.amountPaid),
+        paymentMethod: rep.paymentMethod,
+        reference: rep.reference,
+      })),
+      organization: {
+        name: organization?.name || process.env.APP_NAME,
+        phone: organization?.phone,
+        email: organization?.email,
+      },
+      branch: {
+        name: branch?.name,
+        code: branch?.code,
+      },
+    };
+  }
+
+  async getRepaymentReceipt(repaymentId, organizationId) {
+    const { User, Organization, Branch } = await import('../models/index.js');
+
+    const repayment = await LoanRepayment.findOne({
+      where: { id: repaymentId, organizationId },
+      include: [
+        {
+          model: Loan,
+          as: 'loan',
+          attributes: ['loanNumber', 'type', 'principalBalance'],
+          include: [
+            {
+              model: Member,
+              as: 'member',
+              attributes: ['firstName', 'lastName', 'memberNumber', 'phone'],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: 'processor',
+          attributes: ['firstName', 'lastName'],
+        },
+      ],
+    });
+
+    if (!repayment) {
+      throw new NotFoundError('Repayment record not found.');
+    }
+
+    const organization = await Organization.findByPk(organizationId);
+    const branch = await Branch.findByPk(repayment.loan.branchId);
+
+    return {
+      receipt: {
+        reference: repayment.reference,
+        paymentDate: repayment.paymentDate,
+        installmentNumber: repayment.installmentNumber,
+        amountPaid: parseFloat(repayment.amountPaid),
+        principalPaid: parseFloat(repayment.principalPaid),
+        interestPaid: parseFloat(repayment.interestPaid),
+        penaltyPaid: parseFloat(repayment.penaltyPaid),
+        paymentMethod: repayment.paymentMethod,
+        externalReference: repayment.externalReference,
+        status: repayment.status,
+      },
+      loan: {
+        loanNumber: repayment.loan.loanNumber,
+        type: repayment.loan.type,
+        principalBalance: parseFloat(repayment.loan.principalBalance),
+      },
+      member: {
+        name: `${repayment.loan.member.firstName} ${repayment.loan.member.lastName}`,
+        memberNumber: repayment.loan.member.memberNumber,
+        phone: repayment.loan.member.phone,
+      },
+      teller: {
+        name: repayment.processor
+          ? `${repayment.processor.firstName} ${repayment.processor.lastName}`
+          : 'System',
+      },
+      organization: {
+        name: organization?.name || process.env.APP_NAME,
+        phone: organization?.phone,
+        email: organization?.email,
+        address: organization?.address,
+      },
+      branch: {
+        name: branch?.name,
+        code: branch?.code,
+      },
+    };
+  }
+
   // ─── Private helpers ─────────────────────────────────────────────
   _calculateLoanFigures(principal, rate, method, termMonths) {
     let interestAmount, totalRepayable, monthlyInstallment;

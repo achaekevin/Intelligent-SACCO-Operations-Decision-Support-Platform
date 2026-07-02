@@ -92,5 +92,19 @@ class LoanController {
       return successResponse(res, { data: stats });
     } catch (err) { next(err); }
   }
+
+  async getLoanSummary(req, res, next) {
+    try {
+      const summary = await loanService.getLoanRepaymentSummary(req.params.id, req.user.organizationId);
+      return successResponse(res, { data: summary });
+    } catch (err) { next(err); }
+  }
+
+  async getRepaymentReceipt(req, res, next) {
+    try {
+      const receipt = await loanService.getRepaymentReceipt(req.params.repaymentId, req.user.organizationId);
+      return successResponse(res, { data: receipt });
+    } catch (err) { next(err); }
+  }
 }
 export default new LoanController();
