@@ -93,6 +93,16 @@ class SavingsController {
       return paginatedResponse(res, { data: result.transactions, total: result.total, page: result.page, limit: result.limit });
     } catch (err) { next(err); }
   }
+
+  async getReceipt(req, res, next) {
+    try {
+      const receipt = await savingsService.getTransactionReceipt(
+        req.params.transactionId,
+        req.user.organizationId
+      );
+      return successResponse(res, { data: receipt });
+    } catch (err) { next(err); }
+  }
 }
 
 export default new SavingsController();

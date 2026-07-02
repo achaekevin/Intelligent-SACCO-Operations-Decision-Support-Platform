@@ -359,6 +359,84 @@ class SavingsService {
     logger.info(`Interest accrual: credited ${credited} accounts in org ${organizationId}`);
     return credited;
   }
+
+  // ─── Receipt ────────────────────────────────────────────────
+
+  async getTransactionReceipt(transactionId, organizationId) {
+    const { Op } = await import('sequelize');
+    const { User, Organization, Branch } = await import('../models/index.js');
+
+    const transaction = await SavingsTransaction.findOne({
+      where: { id: transactionId, organizationId },
+      include: [
+        {
+          model: SavingsAccount,
+          as: 'account',
+          attributes: ['accountNumber', 'accountType'],
+          include: [
+            {
+              model: Member,
+              as: 'member',
+              attributes: ['firstName', 'lastName', 'memberNumber', 'phone'],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: 'processor',
+          attributes: ['firstName', 'lastName'],
+        },
+      ],
+    });
+
+    if (!transaction) {
+      throw new NotFoundError('Transaction not found.');
+    }
+
+    // Get organization details
+    const organization = await Organization.findByPk(organizationId);
+    const branch = await Branch.findByPk(transaction.branchId);
+
+    return {
+      receipt: {
+        reference: transaction.reference,
+        date: transaction.createdAt,
+        type: transaction.type,
+        amount: parseFloat(transaction.amount),
+        paymentMethod: transaction.paymentMethod,
+        externalReference: transaction.externalReference,
+        description: transaction.description,
+        status: transaction.status,
+        balanceAfter: parseFloat(transaction.balanceAfter),
+      },
+      member: {
+        name: transaction.account?.member
+          ? `${transaction.account.member.firstName} ${transaction.account.member.lastName}`
+          : 'N/A',
+        memberNumber: transaction.account?.member?.memberNumber,
+        phone: transaction.account?.member?.phone,
+      },
+      account: {
+        accountNumber: transaction.account?.accountNumber,
+        accountType: transaction.account?.accountType,
+      },
+      teller: {
+        name: transaction.processor
+          ? `${transaction.processor.firstName} ${transaction.processor.lastName}`
+          : 'System',
+      },
+      organization: {
+        name: organization?.name || process.env.APP_NAME,
+        phone: organization?.phone,
+        email: organization?.email,
+        address: organization?.address,
+      },
+      branch: {
+        name: branch?.name,
+        code: branch?.code,
+      },
+    };
+  }
 }
 
 export default new SavingsService();

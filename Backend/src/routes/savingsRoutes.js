@@ -173,4 +173,14 @@ router.post('/transactions/:transactionId/reverse',
   savingsController.reverseTransaction,
 );
 
+/**
+ * @swagger
+ * /savings/transactions/{transactionId}/receipt:
+ *   get:
+ *     summary: Get transaction receipt
+ *     tags: [Savings]
+ *     security: [{ bearerAuth: [] }]
+ */
+router.get('/transactions/:transactionId/receipt', savingsController.getReceipt);
+
 export default router;
