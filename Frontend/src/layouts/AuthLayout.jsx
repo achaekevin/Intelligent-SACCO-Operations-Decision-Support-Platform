@@ -14,8 +14,8 @@ const AuthLayout = () => {
   if (isLoginPage) {
     return (
       <div className={theme === 'dark' ? 'dark' : ''}>
-        <div className="min-h-screen flex flex-col">
-          <div className="flex-1">
+        <div className="h-screen flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
             <Outlet />
           </div>
           <Footer />
