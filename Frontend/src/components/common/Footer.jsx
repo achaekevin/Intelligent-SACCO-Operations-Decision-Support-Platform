@@ -7,7 +7,7 @@ const Footer = () => {
           <span className="font-semibold text-teal-600 dark:text-teal-400">Kevin Achae</span>
         </div>
         <div className="text-center text-[10px] text-ink-500 dark:text-ink-500 mt-0.5">
-          © {new Date().getFullYear()} Amana SACCO. All rights reserved.
+          © {new Date().getFullYear()} Imara SACCO. All rights reserved.
         </div>
       </div>
     </footer>

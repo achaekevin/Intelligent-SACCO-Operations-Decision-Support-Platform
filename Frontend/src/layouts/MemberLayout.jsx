@@ -27,7 +27,7 @@ const MemberLayout = () => {
               <div className="w-9 h-9 rounded-lg bg-gold-400 flex items-center justify-center">
                 <Landmark size={18} className="text-ink-900" />
               </div>
-              <span className="font-display font-bold text-ink-800 dark:text-ink-50">Amana SACCO</span>
+              <span className="font-display font-bold text-ink-800 dark:text-ink-50">Imara SACCO</span>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => dispatch(toggleTheme())} className="p-2 rounded-lg text-ink-600 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-ink-700">

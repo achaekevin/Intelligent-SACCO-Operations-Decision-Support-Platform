@@ -262,7 +262,7 @@ class NotificationService {
       memberId: member.id,
       type: 'member',
       title: 'Account Activated',
-      message: `Welcome to Amana SACCO! Your member account ${member.memberNumber} has been activated. You can now access all services.`,
+      message: `Welcome to Imara SACCO! Your member account ${member.memberNumber} has been activated. You can now access all services.`,
       channels: ['in_app', 'email', 'sms'],
       metadata: {
         memberId: member.id,
@@ -382,7 +382,7 @@ class NotificationService {
                   <tr>
                     <td style="padding: 32px 32px 24px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); border-radius: 8px 8px 0 0;">
                       <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">
-                        Amana SACCO
+                        Imara SACCO
                       </h1>
                     </td>
                   </tr>
@@ -418,10 +418,10 @@ class NotificationService {
                   <tr>
                     <td style="padding: 24px 32px; background-color: #f9fafb; border-radius: 0 0 8px 8px; text-align: center;">
                       <p style="margin: 0; color: #6b7280; font-size: 12px;">
-                        This is an automated notification from Amana SACCO Management System
+                        This is an automated notification from Imara SACCO Management System
                       </p>
                       <p style="margin: 8px 0 0; color: #9ca3af; font-size: 11px;">
-                        © ${new Date().getFullYear()} Amana SACCO. All rights reserved.
+                        © ${new Date().getFullYear()} Imara SACCO. All rights reserved.
                       </p>
                     </td>
                   </tr>

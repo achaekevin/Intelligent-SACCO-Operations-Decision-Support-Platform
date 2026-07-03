@@ -49,7 +49,7 @@ const Sidebar = () => {
               <Landmark size={18} className="text-ink-900" />
             </div>
             {!sidebarCollapsed && (
-              <span className="font-display font-bold text-lg tracking-tight whitespace-nowrap">Amana SACCO</span>
+              <span className="font-display font-bold text-lg tracking-tight whitespace-nowrap">Imara SACCO</span>
             )}
           </div>
           <button

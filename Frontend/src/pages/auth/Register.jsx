@@ -92,7 +92,7 @@ const Register = () => {
               </div>
             </div>
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">Register Your SACCO</h1>
-            <p className="text-slate-300 text-sm md:text-base">Join Amana SACCO Platform and transform your cooperative management</p>
+            <p className="text-slate-300 text-sm md:text-base">Join Imara SACCO Platform and transform your cooperative management</p>
           </div>
 
           {/* Form */}

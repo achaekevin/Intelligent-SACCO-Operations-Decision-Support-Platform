@@ -132,7 +132,7 @@ const Login = () => {
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-white font-bold text-sm md:text-base">Amana SACCO</h2>
+                <h2 className="text-white font-bold text-sm md:text-base">Imara SACCO</h2>
                 <p className="text-slate-400 text-[10px]">Empowering Community Finance</p>
               </div>
             </div>
@@ -204,7 +204,7 @@ const Login = () => {
 
             {/* Header */}
             <div className="text-center mb-5">
-              <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">Welcome back to Amana</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">Welcome back to Imara</h2>
               <p className="text-slate-600 text-xs">Sign in to access your SACCO dashboard</p>
             </div>
 

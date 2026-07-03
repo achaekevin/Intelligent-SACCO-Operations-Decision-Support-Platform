@@ -40,7 +40,7 @@ const AuthLayout = () => {
             <div className="w-10 h-10 rounded-lg bg-gold-400 flex items-center justify-center hover:rotate-12 transition-transform duration-300">
               <Landmark size={20} className="text-ink-900" />
             </div>
-            <span className="font-display font-bold text-xl">Amana SACCO</span>
+            <span className="font-display font-bold text-xl">Imara SACCO</span>
           </div>
 
           <div className="relative">
@@ -67,7 +67,7 @@ const AuthLayout = () => {
           </div>
 
           <div className="relative animate-fade-in-up delay-500">
-            <p className="text-xs text-ink-400">© 2026 Amana SACCO. All rights reserved.</p>
+            <p className="text-xs text-ink-400">© 2026 Imara SACCO. All rights reserved.</p>
             <p className="text-xs text-ink-500 mt-1">
               Designed by <span className="text-gold-400 font-semibold">Kevin Achae</span>
             </p>

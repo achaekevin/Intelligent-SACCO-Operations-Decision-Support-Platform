@@ -85,7 +85,7 @@ const MemberRegister = () => {
                 <Users className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">Join Amana SACCO</h1>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">Join Imara SACCO</h1>
             <p className="text-slate-300 text-sm md:text-base">Apply for membership and start your savings journey</p>
           </div>
 

@@ -559,7 +559,7 @@ const DepositManagement = () => {
               {/* Receipt Header */}
               <div className="text-center border-b-2 border-dashed border-ink-300 pb-4 mb-6">
                 <div className="text-2xl font-bold text-ink-900 dark:text-ink-100 mb-2">
-                  {receipt?.organization?.name || 'Amana SACCO'}
+                  {receipt?.organization?.name || 'Imara SACCO'}
                 </div>
                 {receipt?.organization?.address && (
                   <div className="text-sm text-ink-600 dark:text-ink-400">

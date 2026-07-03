@@ -1,4 +1,4 @@
-# Amana SACCO — Management System (Frontend)
+# Imara SACCO — Management System (Frontend)
 
 A modern, responsive frontend for a Kenyan SACCO management platform, built with React, Vite, Tailwind CSS, Material UI, Redux Toolkit, React Hook Form + Yup, Recharts, and React Toastify.
 

@@ -421,7 +421,7 @@ const TransactionList = () => {
               {/* Receipt Header */}
               <div className="flex justify-between items-start mb-6 print:mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-ink-800 dark:text-ink-50">Amana SACCO</h2>
+                  <h2 className="text-2xl font-bold text-ink-800 dark:text-ink-50">Imara SACCO</h2>
                   <p className="text-sm text-ink-400">Transaction Receipt</p>
                 </div>
                 <button
@@ -501,7 +501,7 @@ const TransactionList = () => {
               {/* Receipt Footer */}
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 text-center text-xs text-ink-400">
                 <p>This is a computer-generated receipt and does not require a signature</p>
-                <p className="mt-1">© 2026 Amana SACCO. All rights reserved.</p>
+                <p className="mt-1">© 2026 Imara SACCO. All rights reserved.</p>
               </div>
 
               {/* Action Buttons */}

@@ -329,7 +329,7 @@ class ReportService {
         doc.on('error', reject);
 
         // Header
-        doc.fontSize(18).fillColor('#16a34a').text('Amana SACCO', { align: 'center' });
+        doc.fontSize(18).fillColor('#16a34a').text('Imara SACCO', { align: 'center' });
         doc.fontSize(14).fillColor('#374151').text('Member Statement', { align: 'center' });
         doc.moveDown();
 
