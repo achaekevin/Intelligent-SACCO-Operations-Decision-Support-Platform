@@ -20,6 +20,7 @@ import CashCountingModal from './CashCountingModal';
 import TargetsCard from './TargetsCard';
 import TransactionReviewModal from './TransactionReviewModal';
 import PendingApprovalsCard from './PendingApprovalsCard';
+import ReceiptManagement from './ReceiptManagement';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -34,6 +35,7 @@ const TellerDashboard = () => {
   const [showCashCounting, setShowCashCounting] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [showReceiptManagement, setShowReceiptManagement] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -370,6 +372,14 @@ const TellerDashboard = () => {
           </button>
 
           <button
+            onClick={() => setShowReceiptManagement(true)}
+            className="flex flex-col items-center justify-center p-4 bg-pink-50 dark:bg-pink-900/20 border-2 border-pink-200 dark:border-pink-800 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/30 transition-all hover:scale-105 active:scale-95"
+          >
+            <FileText className="text-pink-600 mb-2" size={24} />
+            <span className="text-xs font-semibold text-pink-900 dark:text-pink-100 text-center">Receipt Manager</span>
+          </button>
+
+          <button
             onClick={() => navigate('/transactions')}
             className="flex flex-col items-center justify-center p-4 bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-200 dark:border-indigo-800 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all hover:scale-105 active:scale-95"
           >
@@ -455,6 +465,10 @@ const TellerDashboard = () => {
           onClose={() => setShowReview(false)}
           onComplete={handleReviewComplete}
         />
+      )}
+
+      {showReceiptManagement && (
+        <ReceiptManagement onClose={() => setShowReceiptManagement(false)} />
       )}
     </div>
   );
