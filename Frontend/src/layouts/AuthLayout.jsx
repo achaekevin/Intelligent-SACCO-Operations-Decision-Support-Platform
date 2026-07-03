@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Landmark, ShieldCheck, TrendingUp, Users } from 'lucide-react'
 import Footer from '../components/common/Footer'
+import ImaraLogo from '../components/common/ImaraLogo'
 
 const AuthLayout = () => {
   const { theme } = useSelector((s) => s.ui)
@@ -38,7 +39,7 @@ const AuthLayout = () => {
 
           <div className="relative flex items-center gap-2 animate-fade-in-up">
             <div className="w-10 h-10 rounded-lg bg-gold-400 flex items-center justify-center hover:rotate-12 transition-transform duration-300">
-              <Landmark size={20} className="text-ink-900" />
+              <ImaraLogo size={24} />
             </div>
             <span className="font-display font-bold text-xl">Imara SACCO</span>
           </div>

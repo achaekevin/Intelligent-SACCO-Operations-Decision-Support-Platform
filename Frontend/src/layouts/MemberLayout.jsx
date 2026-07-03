@@ -10,6 +10,7 @@ import { useSessionTimeout } from '../hooks/useSessionTimeout'
 import { classNames, initials } from '../utils/format'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../components/common/Footer'
+import ImaraLogo from '../components/common/ImaraLogo'
 
 const MemberLayout = () => {
   const dispatch = useDispatch()
@@ -25,7 +26,7 @@ const MemberLayout = () => {
           <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-gold-400 flex items-center justify-center">
-                <Landmark size={18} className="text-ink-900" />
+                <ImaraLogo size={20} />
               </div>
               <span className="font-display font-bold text-ink-800 dark:text-ink-50">Imara SACCO</span>
             </div>

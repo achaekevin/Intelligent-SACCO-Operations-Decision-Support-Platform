@@ -9,6 +9,7 @@ import { Eye, EyeOff, Mail, Lock, Users, Handshake, TrendingUp, Shield, ChevronL
 import { loginUser } from '../../redux/slices/authSlice'
 import Button from '../../components/common/Button'
 import { ROLES } from '../../constants/roles'
+import ImaraLogo from '../../components/common/ImaraLogo'
 
 const schema = yup.object({
   email: yup.string().email('Enter a valid email').required('Email is required'),
@@ -129,7 +130,7 @@ const Login = () => {
             {/* Logo */}
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
+                <ImaraLogo size={20} />
               </div>
               <div>
                 <h2 className="text-white font-bold text-sm md:text-base">Imara SACCO</h2>
@@ -198,7 +199,7 @@ const Login = () => {
             {/* Logo */}
             <div className="flex items-center justify-center mb-4">
               <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center">
-                <Shield className="w-7 h-7 text-white" />
+                <ImaraLogo size={32} />
               </div>
             </div>
 

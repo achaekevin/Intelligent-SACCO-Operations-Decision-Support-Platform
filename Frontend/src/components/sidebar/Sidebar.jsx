@@ -6,6 +6,7 @@ import { ROUTE_ACCESS } from '../../constants/roles'
 import { toggleSidebar, closeMobileSidebar } from '../../redux/slices/uiSlice'
 import { useAuth } from '../../hooks/useAuth'
 import { classNames } from '../../utils/format'
+import ImaraLogo from '../common/ImaraLogo'
 
 const Sidebar = () => {
   const dispatch = useDispatch()
@@ -46,7 +47,7 @@ const Sidebar = () => {
         <div className="flex items-center justify-between px-4 h-16 border-b border-ink-700/60 shrink-0">
           <div className="flex items-center gap-2 overflow-hidden">
             <div className="w-9 h-9 rounded-lg bg-gold-400 flex items-center justify-center shrink-0">
-              <Landmark size={18} className="text-ink-900" />
+              <ImaraLogo size={20} />
             </div>
             {!sidebarCollapsed && (
               <span className="font-display font-bold text-lg tracking-tight whitespace-nowrap">Imara SACCO</span>
