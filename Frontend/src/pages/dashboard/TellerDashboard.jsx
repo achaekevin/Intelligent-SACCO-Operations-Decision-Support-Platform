@@ -19,6 +19,7 @@ import { formatKES, formatNumber, formatDate, formatTime } from '../../utils/for
 import CashCountingModal from './CashCountingModal';
 import TargetsCard from './TargetsCard';
 import TransactionReviewModal from './TransactionReviewModal';
+import PendingApprovalsCard from './PendingApprovalsCard';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -218,6 +219,9 @@ const TellerDashboard = () => {
 
       {/* Daily Targets Card */}
       {targets && <TargetsCard targets={targets} />}
+
+      {/* Pending Approvals Card */}
+      <PendingApprovalsCard />
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
