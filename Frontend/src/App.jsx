@@ -8,7 +8,7 @@ import DashboardLayout from './layouts/DashboardLayout'
 import MemberLayout from './layouts/MemberLayout'
 
 // Auth pages
-import Login from './pages/auth/Login'
+import Login from './pages/auth/AnimatedLogin'
 import Register from './pages/auth/Register'
 import MemberRegister from './pages/auth/MemberRegister'
 import ForgotPassword from './pages/auth/ForgotPassword'
