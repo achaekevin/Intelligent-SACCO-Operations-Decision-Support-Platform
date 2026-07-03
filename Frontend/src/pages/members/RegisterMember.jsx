@@ -185,9 +185,10 @@ const RegisterMember = () => {
         }
       }
 
-      toast.success(`Member registered successfully! Member Number: ${memberNumber}`, { 
+      toast.success(`Member ${memberNumber} registered successfully! Login credentials have been sent to ${data.email}`, { 
         id: loadingToast,
-        duration: 3000 
+        duration: 5000,
+        icon: '✅'
       });
       
       dispatch(fetchMembers());

@@ -225,29 +225,36 @@ class MemberService {
         const orgName = organization?.name || process.env.APP_NAME;
 
         // Send registration confirmation email (Email #1)
+        logger.info(`Attempting to send registration email to ${member.email}`);
         emailService.sendMemberRegistrationEmail({
           firstName: member.firstName,
           lastName: member.lastName,
           email: member.email,
           memberNumber: member.memberNumber,
-        }, orgName).catch((e) =>
-          logger.error('Registration email failed:', e.message)
-        );
+        }, orgName).then(() => {
+          logger.info(`✅ Registration email sent successfully to ${member.email}`);
+        }).catch((e) => {
+          logger.error(`❌ Registration email failed for ${member.email}:`, e.message);
+        });
 
         // Send login credentials email 2 seconds later (Email #2)
         setTimeout(() => {
+          logger.info(`Attempting to send login credentials to ${member.email}`);
           emailService.sendMemberLoginCredentials({
             firstName: member.firstName,
             lastName: member.lastName,
             email: member.email,
             memberNumber: member.memberNumber,
-          }, data.email.toLowerCase(), tempPassword, orgName).catch((e) =>
-            logger.error('Login credentials email failed:', e.message)
-          );
+          }, data.email.toLowerCase(), tempPassword, orgName).then(() => {
+            logger.info(`✅ Login credentials sent successfully to ${member.email}`);
+          }).catch((e) => {
+            logger.error(`❌ Login credentials email failed for ${member.email}:`, e.message);
+          });
         }, 2000);
 
         // Send admin notification email (Email #3)
         setTimeout(() => {
+          logger.info(`Attempting to send admin notification about ${member.memberNumber}`);
           // Send to SMTP_USER (admin email)
           emailService.sendAdminNotificationEmail(
             process.env.SMTP_USER,
@@ -260,10 +267,14 @@ class MemberService {
               memberNumber: member.memberNumber,
             },
             orgName
-          ).catch((e) =>
-            logger.error('Admin notification email failed:', e.message)
-          );
+          ).then(() => {
+            logger.info(`✅ Admin notification sent successfully`);
+          }).catch((e) => {
+            logger.error(`❌ Admin notification email failed:`, e.message);
+          });
         }, 4000);
+      } else {
+        logger.warn(`Member ${member.memberNumber} registered but no email/password to send: email=${member.email}, hasPassword=${!!tempPassword}`);
       }
 
       logger.info(`New member registered: ${memberNumber} in org ${organizationId}`);

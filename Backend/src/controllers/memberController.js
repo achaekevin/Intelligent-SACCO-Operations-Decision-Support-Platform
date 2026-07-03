@@ -22,7 +22,10 @@ class MemberController {
         data,
         req.user.id,
       );
-      return createdResponse(res, { message: 'Member registered successfully.', data: member });
+      return createdResponse(res, { 
+        message: `Member registered successfully! ${data.email ? 'Login credentials have been sent to ' + data.email : 'Member number: ' + member.memberNumber}`, 
+        data: member 
+      });
     } catch (err) { next(err); }
   }
 

@@ -35,7 +35,8 @@ const createApp = () => {
   // ─── CORS ─────────────────────────────────────────────────────
   app.use(cors({
     origin: (origin, callback) => {
-      const allowed = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:5173').split(',');
+      const allowed = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:5174').split(',');
+      // Allow all requests in development (including network access)
       if (!origin || allowed.includes(origin) || process.env.NODE_ENV === 'development') {
         return callback(null, true);
       }
