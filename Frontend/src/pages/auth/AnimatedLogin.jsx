@@ -94,11 +94,22 @@ const AnimatedLogin = () => {
   };
 
   return (
-    <div className="h-screen w-full relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Animated Background - more subtle */}
+    <div className="h-screen w-full relative overflow-hidden">
+      {/* Background Image - Modern Office Building */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop')`,
+        }}
+      >
+        {/* Dark Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/85 to-slate-900/90" />
+      </div>
+
+      {/* Subtle Animated Overlay */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
+          className="absolute w-96 h-96 bg-teal-500/5 rounded-full blur-3xl"
           animate={{
             x: [0, 50, 0],
             y: [0, 30, 0],
@@ -107,7 +118,7 @@ const AnimatedLogin = () => {
           style={{ top: '10%', left: '10%' }}
         />
         <motion.div
-          className="absolute w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"
+          className="absolute w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"
           animate={{
             x: [0, -50, 0],
             y: [0, -30, 0],
