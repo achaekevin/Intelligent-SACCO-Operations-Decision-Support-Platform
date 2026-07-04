@@ -28,10 +28,10 @@ const AnimatedLogin = () => {
     resolver: yupResolver(schema),
   });
 
-  // Cycle through sections
+  // Cycle through sections - removed stats section
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSection((prev) => (prev + 1) % 4); // 4 sections: hero, stats, features, trust
+      setCurrentSection((prev) => (prev + 1) % 3); // 3 sections: hero, features, trust
     }, 5000); // Change every 5 seconds
 
     return () => clearInterval(interval);
@@ -49,25 +49,19 @@ const AnimatedLogin = () => {
     }
   };
 
-  const stats = [
-    { value: '150K+', label: 'Members', icon: Users, color: 'from-blue-500 to-cyan-500' },
-    { value: '300+', label: 'SACCOs', icon: Building2, color: 'from-purple-500 to-pink-500' },
-    { value: 'KES 10B+', label: 'Managed', icon: TrendingUp, color: 'from-green-500 to-emerald-500' },
-    { value: '99.9%', label: 'Uptime', icon: CheckCircle, color: 'from-teal-500 to-blue-500' },
-  ];
+  // Removed unrealistic stats - keeping it professional
 
   const features = [
-    { title: 'Member Management', desc: 'Secure member data and records', icon: Users },
-    { title: 'Loan Management', desc: 'Streamlined credit services', icon: TrendingUp },
-    { title: 'Financial Reporting', desc: 'Real-time analytics', icon: Building2 },
-    { title: 'Mobile Banking', desc: 'Access anywhere', icon: Shield },
+    { title: 'Member Management', desc: 'Digital member records and profiles', icon: Users },
+    { title: 'Savings & Loans', desc: 'Track contributions and credit services', icon: TrendingUp },
+    { title: 'Real-time Reports', desc: 'Financial statements and analytics', icon: Building2 },
+    { title: 'Secure Access', desc: 'Role-based permissions and audit logs', icon: Shield },
   ];
 
   const trustBadges = [
-    { label: 'Bank Grade Security', icon: Shield },
-    { label: 'CBK Compliant', icon: CheckCircle },
-    { label: 'Data Encrypted', icon: Lock },
-    { label: 'Two Factor Auth', icon: Shield },
+    { label: 'Encrypted Data', icon: Shield },
+    { label: 'Audit Trail', icon: CheckCircle },
+    { label: 'Secure Login', icon: Lock },
   ];
 
   // Animation variants
@@ -101,26 +95,24 @@ const AnimatedLogin = () => {
 
   return (
     <div className="h-screen w-full relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Animated Background */}
+      {/* Animated Background - more subtle */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+          className="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
           animate={{
-            x: [0, 100, 0],
-            y: [0, 50, 0],
-            scale: [1, 1.2, 1],
+            x: [0, 50, 0],
+            y: [0, 30, 0],
           }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
           style={{ top: '10%', left: '10%' }}
         />
         <motion.div
-          className="absolute w-96 h-96 bg-teal-500/20 rounded-full blur-3xl"
+          className="absolute w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"
           animate={{
-            x: [0, -100, 0],
-            y: [0, -50, 0],
-            scale: [1, 1.3, 1],
+            x: [0, -50, 0],
+            y: [0, -30, 0],
           }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+          transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
           style={{ bottom: '10%', right: '10%' }}
         />
       </div>
@@ -128,23 +120,16 @@ const AnimatedLogin = () => {
       <div className="relative z-10 h-full flex flex-col lg:flex-row">
         {/* Left Side - Animated Content */}
         <div className="flex-1 flex flex-col justify-between p-6 md:p-12">
-          {/* Logo */}
+          {/* Logo - subtle animation */}
           <motion.div 
             className="flex items-center gap-2"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <motion.div 
-              className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center"
-              animate={{ 
-                y: [0, -5, 0],
-                rotate: [0, 5, 0]
-              }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
+            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center">
               <ImaraLogo size={24} />
-            </motion.div>
+            </div>
             <div>
               <h2 className="text-white font-bold text-base">Imara SACCO</h2>
               <p className="text-slate-400 text-xs">Empowering Community Finance</p>
@@ -165,71 +150,22 @@ const AnimatedLogin = () => {
                   className="text-center max-w-2xl"
                 >
                   <motion.h1 
-                    className="text-4xl md:text-6xl font-bold text-white mb-4"
+                    className="text-4xl md:text-5xl font-bold text-white mb-4"
                     variants={slideUp}
-                    style={{
-                      background: 'linear-gradient(to right, #10b981, #3b82f6, #10b981)',
-                      backgroundSize: '200% auto',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                    animate={{
-                      backgroundPosition: ['0%', '100%', '0%']
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
                   >
-                    Elevate Your SACCO Operations
+                    Cooperative Financial Management
                   </motion.h1>
                   <motion.p 
                     className="text-lg text-slate-300"
                     variants={slideUp}
                   >
-                    Join Kenya's leading co-operatives in streamlining operations
+                    Streamline your SACCO operations with our comprehensive management system
                   </motion.p>
                 </motion.div>
               )}
 
-              {/* Section 2: Statistics */}
+              {/* Section 2: Features */}
               {currentSection === 1 && (
-                <motion.div
-                  key="stats"
-                  variants={staggerContainer}
-                  initial="hidden"
-                  animate="visible"
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="grid grid-cols-2 gap-6 max-w-3xl"
-                >
-                  {stats.map((stat, idx) => (
-                    <motion.div
-                      key={idx}
-                      variants={scaleIn}
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
-                    >
-                      <motion.div 
-                        className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center mb-3`}
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: idx * 0.2 }}
-                      >
-                        <stat.icon size={24} className="text-white" />
-                      </motion.div>
-                      <motion.div 
-                        className="text-3xl font-bold text-white mb-1"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                      >
-                        {stat.value}
-                      </motion.div>
-                      <div className="text-slate-300 text-sm">{stat.label}</div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-
-              {/* Section 3: Features */}
-              {currentSection === 2 && (
                 <motion.div
                   key="features"
                   variants={staggerContainer}
@@ -242,41 +178,33 @@ const AnimatedLogin = () => {
                     <motion.div
                       key={idx}
                       variants={slideLeft}
-                      whileHover={{ scale: 1.05, rotate: 1 }}
-                      className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 relative overflow-hidden group"
+                      className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/10 to-teal-500/0 group-hover:translate-x-full transition-transform duration-1000" />
-                      <feature.icon size={32} className="text-teal-400 mb-3" />
-                      <h3 className="text-white font-semibold mb-1">{feature.title}</h3>
-                      <p className="text-slate-300 text-sm">{feature.desc}</p>
+                      <feature.icon size={28} className="text-teal-400 mb-3" />
+                      <h3 className="text-white font-semibold mb-1 text-sm">{feature.title}</h3>
+                      <p className="text-slate-300 text-xs">{feature.desc}</p>
                     </motion.div>
                   ))}
                 </motion.div>
               )}
 
-              {/* Section 4: Trust Badges */}
-              {currentSection === 3 && (
+              {/* Section 3: Trust Badges */}
+              {currentSection === 2 && (
                 <motion.div
                   key="trust"
                   variants={staggerContainer}
                   initial="hidden"
                   animate="visible"
                   exit={{ opacity: 0, y: 50 }}
-                  className="grid grid-cols-2 gap-6 max-w-2xl"
+                  className="flex flex-wrap justify-center gap-6 max-w-2xl"
                 >
                   {trustBadges.map((badge, idx) => (
                     <motion.div
                       key={idx}
                       variants={fadeIn}
-                      whileHover={{ scale: 1.1 }}
-                      className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 text-center"
+                      className="bg-white/10 backdrop-blur-lg rounded-xl px-6 py-4 border border-white/20 flex items-center gap-3"
                     >
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: idx * 0.3 }}
-                      >
-                        <badge.icon size={32} className="text-green-400 mx-auto mb-2" />
-                      </motion.div>
+                      <badge.icon size={24} className="text-green-400" />
                       <div className="text-white font-medium text-sm">{badge.label}</div>
                     </motion.div>
                   ))}
@@ -309,13 +237,14 @@ const AnimatedLogin = () => {
             whileHover={{ y: -5 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Logo */}
+            {/* Logo - no animation */}
             <motion.div 
               className="flex items-center justify-center mb-5"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center">
                 <ImaraLogo size={32} />
               </div>
             </motion.div>
@@ -325,10 +254,10 @@ const AnimatedLogin = () => {
               className="text-center mb-5"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.3 }}
             >
-              <h2 className="text-2xl font-bold text-slate-900 mb-1">Welcome back to Imara</h2>
-              <p className="text-slate-600 text-xs">Sign in to access your SACCO dashboard</p>
+              <h2 className="text-2xl font-bold text-slate-900 mb-1">Welcome Back</h2>
+              <p className="text-slate-600 text-xs">Sign in to access your dashboard</p>
             </motion.div>
 
             {/* Form */}
@@ -337,17 +266,16 @@ const AnimatedLogin = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.4 }}
               >
                 <label className="block text-xs font-medium text-slate-700 mb-1">Email address</label>
                 <div className="relative group">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
-                  <motion.input
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-teal-500 transition-colors" />
+                  <input
                     {...register('email')}
                     type="email"
-                    placeholder="admin@greenvalley.edu"
-                    className="w-full bg-slate-50 border-2 border-slate-300 rounded-lg pl-10 pr-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    whileFocus={{ scale: 1.02 }}
+                    placeholder="your.email@example.com"
+                    className="w-full bg-slate-50 border-2 border-slate-300 rounded-lg pl-10 pr-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   />
                 </div>
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
@@ -357,17 +285,16 @@ const AnimatedLogin = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.7 }}
+                transition={{ delay: 0.5 }}
               >
                 <label className="block text-xs font-medium text-slate-700 mb-1">Password</label>
                 <div className="relative group">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
-                  <motion.input
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-teal-500 transition-colors" />
+                  <input
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="w-full bg-slate-50 border-2 border-slate-300 rounded-lg pl-10 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    whileFocus={{ scale: 1.02 }}
+                    className="w-full bg-slate-50 border-2 border-slate-300 rounded-lg pl-10 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   />
                   <button
                     type="button"
@@ -397,28 +324,21 @@ const AnimatedLogin = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
+                transition={{ delay: 0.6 }}
               >
-                <motion.button
+                <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2.5 text-sm rounded-lg transition-all shadow-lg relative overflow-hidden"
-                  whileHover={{ scale: 1.02, boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold py-2.5 text-sm rounded-lg transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
-                    animate={{ x: ['-100%', '100%'] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <span className="relative">{isSubmitting ? 'Signing in...' : 'Sign in'}</span>
-                </motion.button>
+                  {isSubmitting ? 'Signing in...' : 'Sign in'}
+                </button>
               </motion.div>
             </form>
 
             {/* Forgot Password */}
             <div className="text-center mt-3">
-              <Link to="/forgot-password" className="text-xs text-orange-600 hover:text-orange-700 font-medium transition">
+              <Link to="/forgot-password" className="text-xs text-teal-600 hover:text-teal-700 font-medium transition">
                 Forgot your password?
               </Link>
             </div>
