@@ -10,12 +10,16 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  const roleLower = (user?.role || '').toLowerCase()
+  const isAdmin = ['sacco_admin', 'admin', 'system_admin', 'super_admin', 'system administrator'].includes(roleLower)
+
   // Members are routed to the member portal, not the staff dashboard
-  if (user?.role === ROLES.MEMBER && !location.pathname.startsWith('/portal')) {
+  if (roleLower === ROLES.MEMBER && !location.pathname.startsWith('/portal')) {
     return <Navigate to="/portal" replace />
   }
 
-  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+  // Admins always have access to all staff dashboard routes
+  if (allowedRoles && !allowedRoles.includes(user?.role) && !allowedRoles.includes(roleLower) && !isAdmin) {
     return <Navigate to="/unauthorized" replace />
   }
 

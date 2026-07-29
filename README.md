@@ -83,48 +83,10 @@ Role-customizable modular dashboard layout grid for Admins, Loan Officers, Accou
 
 ---
 
-## Installation & Setup
+## Author & Copyright Notice
 
-### Prerequisites
-- Node.js (v18.0.0+)
-- MySQL Server (v8.0+)
+**Developed & Maintained by**: Kevin Achae  
+**GitHub**: [achaekevin](https://github.com/achaekevin)  
+**Email**: achaekevin@gmail.com  
 
-### 1. Clone Repository
-```bash
-git clone https://github.com/achaekevin/Intelligent-SACCO-Operations-Decision-Support-Platform.git
-cd Intelligent-SACCO-Operations-Decision-Support-Platform
-```
-
-### 2. Backend Setup
-```bash
-cd Backend
-npm install --legacy-peer-deps
-```
-Configure `Backend/.env`:
-```env
-PORT=5000
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=sacco_db
-DB_USER=root
-DB_PASSWORD=your_password
-JWT_ACCESS_SECRET=your_secure_access_secret
-```
-Run Backend:
-```bash
-npm run dev
-```
-
-### 3. Frontend Setup
-```bash
-cd ../Frontend
-npm install
-npm run dev
-```
-
-Application will run at `http://localhost:5173`.
-
----
-
-## License
-This project is licensed under the MIT License.
+© 2026 Kevin Achae. All Rights Reserved.

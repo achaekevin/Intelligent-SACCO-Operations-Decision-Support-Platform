@@ -6,6 +6,8 @@ export const ROLES = {
   MEMBER: 'member',
 }
 
+export const ADMIN_ROLE_VARIANTS = ['sacco_admin', 'admin', 'system_admin', 'super_admin', 'SYSTEM_ADMIN', 'ADMIN']
+
 export const ROLE_LABELS = {
   [ROLES.SACCO_ADMIN]: 'SACCO Administrator',
   [ROLES.LOAN_OFFICER]: 'Loan Officer',
@@ -14,21 +16,21 @@ export const ROLE_LABELS = {
   [ROLES.MEMBER]: 'Member',
 }
 
-// Roles allowed to use the staff dashboard (everyone except Member, who gets the Member Portal)
-export const STAFF_ROLES = Object.values(ROLES).filter((r) => r !== ROLES.MEMBER)
+// Roles allowed to use the staff dashboard
+export const STAFF_ROLES = [...ADMIN_ROLE_VARIANTS, ROLES.LOAN_OFFICER, ROLES.TELLER, ROLES.AUDITOR, 'cashier', 'credit_officer', 'accountant', 'branch_manager']
 
-// Simple per-route role gating. '*' = any authenticated staff role.
+// Per-route role gating
 export const ROUTE_ACCESS = {
   dashboard: STAFF_ROLES,
-  members: [ROLES.SACCO_ADMIN, ROLES.LOAN_OFFICER, ROLES.TELLER],
-  branches: [ROLES.SACCO_ADMIN],
-  loans: [ROLES.SACCO_ADMIN, ROLES.LOAN_OFFICER],
-  savings: [ROLES.SACCO_ADMIN, ROLES.TELLER],
-  transactions: [ROLES.SACCO_ADMIN, ROLES.TELLER],
-  accounting: [ROLES.SACCO_ADMIN, ROLES.AUDITOR],
+  members: [...ADMIN_ROLE_VARIANTS, ROLES.LOAN_OFFICER, ROLES.TELLER, 'cashier'],
+  branches: ADMIN_ROLE_VARIANTS,
+  loans: [...ADMIN_ROLE_VARIANTS, ROLES.LOAN_OFFICER, 'credit_officer'],
+  savings: [...ADMIN_ROLE_VARIANTS, ROLES.TELLER, 'cashier'],
+  transactions: [...ADMIN_ROLE_VARIANTS, ROLES.TELLER, 'cashier'],
+  accounting: [...ADMIN_ROLE_VARIANTS, ROLES.AUDITOR, 'accountant', 'finance_manager'],
   reports: STAFF_ROLES,
   notifications: STAFF_ROLES,
-  audit: [ROLES.SACCO_ADMIN, ROLES.AUDITOR],
-  settings: [ROLES.SACCO_ADMIN],
+  audit: [...ADMIN_ROLE_VARIANTS, ROLES.AUDITOR],
+  settings: ADMIN_ROLE_VARIANTS,
   profile: STAFF_ROLES,
 }
