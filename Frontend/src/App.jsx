@@ -95,6 +95,19 @@ import MemberStatements from './pages/member-portal/MemberStatements'
 import NotFound from './pages/NotFound'
 import Unauthorized from './pages/Unauthorized'
 
+import LoanEligibilityEvaluator from './pages/enterprise/LoanEligibilityEvaluator'
+import WorkflowManager from './pages/enterprise/WorkflowManager'
+import RuleEngineManager from './pages/enterprise/RuleEngineManager'
+import DigitalDocumentCenter from './pages/enterprise/DigitalDocumentCenter'
+import FinancialHealthPage from './pages/enterprise/FinancialHealthPage'
+import SmartAlertsCenter from './pages/enterprise/SmartAlertsCenter'
+import FraudMonitoringPage from './pages/enterprise/FraudMonitoringPage'
+import CentralApprovalPage from './pages/enterprise/CentralApprovalPage'
+import DynamicProductBuilderPage from './pages/enterprise/DynamicProductBuilderPage'
+import ProcessAutomationPage from './pages/enterprise/ProcessAutomationPage'
+import InternalMessagingPage from './pages/enterprise/InternalMessagingPage'
+import AnalyticsCenterPage from './pages/enterprise/AnalyticsCenterPage'
+
 function App() {
   return (
     <Routes>
@@ -117,6 +130,20 @@ function App() {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Enterprise Suite Features */}
+        <Route path="/enterprise/eligibility" element={<LoanEligibilityEvaluator />} />
+        <Route path="/enterprise/workflows" element={<WorkflowManager />} />
+        <Route path="/enterprise/rules" element={<RuleEngineManager />} />
+        <Route path="/enterprise/documents" element={<DigitalDocumentCenter />} />
+        <Route path="/enterprise/financial-health" element={<FinancialHealthPage />} />
+        <Route path="/enterprise/smart-alerts" element={<SmartAlertsCenter />} />
+        <Route path="/enterprise/fraud-monitoring" element={<FraudMonitoringPage />} />
+        <Route path="/enterprise/approvals" element={<CentralApprovalPage />} />
+        <Route path="/enterprise/product-builder" element={<DynamicProductBuilderPage />} />
+        <Route path="/enterprise/automation" element={<ProcessAutomationPage />} />
+        <Route path="/enterprise/messaging" element={<InternalMessagingPage />} />
+        <Route path="/enterprise/analytics" element={<AnalyticsCenterPage />} />
 
         <Route path="/members" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.members}><MemberList /></ProtectedRoute>} />
         <Route path="/members/search" element={<ProtectedRoute allowedRoles={ROUTE_ACCESS.members}><MemberSearch /></ProtectedRoute>} />

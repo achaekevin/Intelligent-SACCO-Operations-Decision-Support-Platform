@@ -13,6 +13,7 @@ import notificationRoutes from './notificationRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
 import dashboardRoutes from './dashboardRoutes.js';
 import tellerRoutes from './tellerRoutes.js';
+import enterpriseRoutes from './enterpriseRoutes.js';
 
 const router = Router();
 
@@ -40,5 +41,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/audit-logs',    auditLogRoutes);
 router.use('/dashboard',     dashboardRoutes);
 router.use('/teller',        tellerRoutes);
+router.use('/enterprise',    enterpriseRoutes);
 
 export default router;

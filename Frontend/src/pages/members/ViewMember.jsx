@@ -10,6 +10,7 @@ import Card from '../../components/common/Card'
 import DataTable from '../../components/tables/DataTable'
 import EmptyState from '../../components/common/EmptyState'
 import { formatKES, formatDate, initials } from '../../utils/format'
+import MemberTimelineView from '../../components/members/MemberTimelineView'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
 
@@ -252,6 +253,11 @@ const ViewMember = () => {
           <DataTable columns={loanCols} data={loans} title="member-loans" exportable={false} pageSize={5} />
         </div>
       )}
+
+      {/* Member Lifecycle Timeline */}
+      <div className="mt-8">
+        <MemberTimelineView memberId={id} />
+      </div>
     </div>
   )
 }

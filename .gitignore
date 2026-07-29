@@ -66,5 +66,18 @@ Frontend/.env
 Frontend/dist/
 Frontend/.vite/
 
+# Sensitive Credentials & Local Documentation
+CREDENTIALS.md
+*.credentials
+*.key
+*.pem
+
+# Agent & System Directories
+.agents/
+.gemini/
+brain/
+knowledge/
+artifacts/
+
 # Test email script (contains sensitive data)
 Backend/test-email.js

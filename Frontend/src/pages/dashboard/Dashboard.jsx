@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import TellerDashboard from './TellerDashboard'
+import LoanOfficerDashboard from './LoanOfficerDashboard'
+import AuditorDashboard from './AuditorDashboard'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
 import {
@@ -28,10 +30,22 @@ const Dashboard = () => {
   const [savingsGrowth, setSavingsGrowth] = useState([])
   const [memberGrowth, setMemberGrowth] = useState([])
 
-  // Show Teller Dashboard for cashiers/tellers
-  if (user?.role === 'cashier' || user?.role === 'teller') {
-    return <TellerDashboard />;
+  const normalizedRole = user?.role?.toLowerCase() || ''
+
+  // Route to specialized Role Dashboards
+  if (normalizedRole === 'teller' || normalizedRole === 'cashier') {
+    return <TellerDashboard />
   }
+  if (normalizedRole === 'loan_officer' || normalizedRole === 'credit_officer') {
+    return <LoanOfficerDashboard />
+  }
+  if (normalizedRole === 'auditor') {
+    return <AuditorDashboard />
+  }
+  if (normalizedRole === 'member') {
+    return <Navigate to="/portal" replace />
+  }
+
 
   useEffect(() => {
     fetchDashboardData()

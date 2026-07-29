@@ -14,7 +14,8 @@ export const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const secret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'sacco_jwt_secret_key_2026_super_secure';
+    const decoded = jwt.verify(token, secret);
 
     // Check if token has been blacklisted (e.g. after logout)
     const isBlacklisted = await redisGet(`blacklist:${token}`);

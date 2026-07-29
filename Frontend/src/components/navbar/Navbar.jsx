@@ -99,13 +99,20 @@ const Navbar = () => {
             <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-ink-800 rounded-xl shadow-card-hover border border-ink-100 dark:border-ink-700 overflow-hidden py-1">
               <button
                 onClick={() => { navigate('/profile'); setProfileOpen(false) }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-ink-700 dark:text-ink-100 hover:bg-ink-50 dark:hover:bg-ink-700/50"
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink-700 dark:text-ink-100 hover:bg-ink-50 dark:hover:bg-ink-700/50"
               >
                 <User size={16} /> My Profile
               </button>
               <button
+                onClick={() => { navigate('/profile/change-password'); setProfileOpen(false) }}
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink-700 dark:text-ink-100 hover:bg-ink-50 dark:hover:bg-ink-700/50"
+              >
+                <Settings size={16} className="hidden" />
+                <span className="flex items-center gap-2">🔑 Change Password</span>
+              </button>
+              <button
                 onClick={() => { navigate('/settings'); setProfileOpen(false) }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-ink-700 dark:text-ink-100 hover:bg-ink-50 dark:hover:bg-ink-700/50"
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink-700 dark:text-ink-100 hover:bg-ink-50 dark:hover:bg-ink-700/50"
               >
                 <Settings size={16} /> Settings
               </button>

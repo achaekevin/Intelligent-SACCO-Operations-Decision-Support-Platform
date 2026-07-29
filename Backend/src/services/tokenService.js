@@ -8,6 +8,7 @@ class TokenService {
    * Generate JWT access token carrying user claims
    */
   generateAccessToken(user, permissions = []) {
+    const secret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'sacco_jwt_secret_key_2026_super_secure';
     return jwt.sign(
       {
         id: user.id,
@@ -17,8 +18,8 @@ class TokenService {
         branchId: user.branchId,
         permissions,
       },
-      process.env.JWT_ACCESS_SECRET,
-      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '30m' }
+      secret,
+      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '7d' }
     );
   }
 

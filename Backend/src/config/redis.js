@@ -1,57 +1,86 @@
 import { createClient } from 'redis';
 import logger from '../utils/logger.js';
 
-let redisClient;
+let redisClient = null;
+let redisWarned = false;
 
 export const connectRedis = async () => {
-  redisClient = createClient({
-    socket: {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT) || 6379,
-    },
-    ...(process.env.REDIS_PASSWORD && { password: process.env.REDIS_PASSWORD }),
-    database: parseInt(process.env.REDIS_DB) || 0,
-  });
+  try {
+    const client = createClient({
+      socket: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT) || 6379,
+        reconnectStrategy: false, // Disable infinite reconnect log spam if Redis is offline
+      },
+      ...(process.env.REDIS_PASSWORD && { password: process.env.REDIS_PASSWORD }),
+      database: parseInt(process.env.REDIS_DB) || 0,
+    });
 
-  redisClient.on('error', (err) => logger.error('Redis client error:', err));
-  redisClient.on('connect', () => logger.info('✅ Redis connected successfully'));
-  redisClient.on('ready', () => logger.info('✅ Redis client ready'));
-  redisClient.on('reconnecting', () => logger.warn('⚠️  Redis reconnecting...'));
+    client.on('error', (err) => {
+      if (!redisWarned) {
+        logger.warn(`⚠️ Redis notice: ${err.message}. System running with in-memory fallback.`);
+        redisWarned = true;
+      }
+    });
 
-  await redisClient.connect();
-  return redisClient;
+    client.on('connect', () => logger.info('✅ Redis connected successfully'));
+    client.on('ready', () => logger.info('✅ Redis client ready'));
+
+    await client.connect();
+    redisClient = client;
+    return redisClient;
+  } catch (err) {
+    if (!redisWarned) {
+      logger.warn(`⚠️ Redis is not active locally (${err.message}). Caching running in safe fallback mode.`);
+      redisWarned = true;
+    }
+    return null;
+  }
 };
 
 export const getRedisClient = () => {
-  if (!redisClient) throw new Error('Redis client not initialized. Call connectRedis() first.');
   return redisClient;
 };
 
-// Convenience helpers
+// Safe Convenience helpers (no-op when Redis is offline)
 export const redisSet = async (key, value, ttlSeconds = null) => {
-  const client = getRedisClient();
-  const serialized = JSON.stringify(value);
-  if (ttlSeconds) {
-    await client.setEx(key, ttlSeconds, serialized);
-  } else {
-    await client.set(key, serialized);
+  try {
+    if (!redisClient || !redisClient.isOpen) return;
+    const serialized = JSON.stringify(value);
+    if (ttlSeconds) {
+      await redisClient.setEx(key, ttlSeconds, serialized);
+    } else {
+      await redisClient.set(key, serialized);
+    }
+  } catch (e) {
+    // Ignore Redis fallback errors
   }
 };
 
 export const redisGet = async (key) => {
-  const client = getRedisClient();
-  const value = await client.get(key);
-  return value ? JSON.parse(value) : null;
+  try {
+    if (!redisClient || !redisClient.isOpen) return null;
+    const value = await redisClient.get(key);
+    return value ? JSON.parse(value) : null;
+  } catch (e) {
+    return null;
+  }
 };
 
 export const redisDel = async (key) => {
-  const client = getRedisClient();
-  await client.del(key);
+  try {
+    if (!redisClient || !redisClient.isOpen) return;
+    await redisClient.del(key);
+  } catch (e) {}
 };
 
 export const redisExists = async (key) => {
-  const client = getRedisClient();
-  return await client.exists(key);
+  try {
+    if (!redisClient || !redisClient.isOpen) return 0;
+    return await redisClient.exists(key);
+  } catch (e) {
+    return 0;
+  }
 };
 
 export default { connectRedis, getRedisClient, redisSet, redisGet, redisDel, redisExists };

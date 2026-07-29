@@ -6,6 +6,18 @@ import { ROLES } from './roles'
 
 export const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, key: 'dashboard' },
+  { label: 'Loan Eligibility Engine', path: '/enterprise/eligibility', icon: Calculator, key: 'dashboard' },
+  { label: 'Central Approval Center', path: '/enterprise/approvals', icon: ShieldCheck, key: 'dashboard' },
+  { label: 'Financial Health', path: '/enterprise/financial-health', icon: FileBarChart, key: 'dashboard' },
+  { label: 'Workflow Engine', path: '/enterprise/workflows', icon: ScrollText, key: 'dashboard' },
+  { label: 'Rule Engine', path: '/enterprise/rules', icon: Settings, key: 'dashboard' },
+  { label: 'Digital Documents', path: '/enterprise/documents', icon: ScrollText, key: 'dashboard' },
+  { label: 'Smart Alerts', path: '/enterprise/smart-alerts', icon: Bell, key: 'dashboard' },
+  { label: 'Fraud Detection', path: '/enterprise/fraud-monitoring', icon: ShieldCheck, key: 'dashboard' },
+  { label: 'Product Builder', path: '/enterprise/product-builder', icon: Landmark, key: 'dashboard' },
+  { label: 'Process Automation', path: '/enterprise/automation', icon: Settings, key: 'dashboard' },
+  { label: 'Internal Messaging', path: '/enterprise/messaging', icon: Bell, key: 'dashboard' },
+  { label: 'Analytics Center', path: '/enterprise/analytics', icon: FileBarChart, key: 'dashboard' },
   { label: 'Members', path: '/members', icon: Users, key: 'members' },
   { label: 'Savings', path: '/savings', icon: Banknote, key: 'savings' },
   { label: 'Loans', path: '/loans', icon: HandCoins, key: 'loans' },
