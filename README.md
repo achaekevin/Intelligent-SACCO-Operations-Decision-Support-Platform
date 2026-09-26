@@ -80,13 +80,3 @@ Role-customizable modular dashboard layout grid for Admins, Loan Officers, Accou
 | :--- | :--- |
 | **Frontend** | React 18, Vite, TailwindCSS, Lucide Icons, Recharts, Redux Toolkit |
 | **Backend** | Node.js, Express.js, Sequelize ORM, MySQL 8, Redis, Socket.io, BullMQ |
-
----
-
-## Author & Copyright Notice
-
-**Developed & Maintained by**: Kevin Achae  
-**GitHub**: [achaekevin](https://github.com/achaekevin)  
-**Email**: achaekevin@gmail.com  
-
-© 2026 Kevin Achae. All Rights Reserved.
